@@ -1,0 +1,7 @@
+# .gitignore
+
+# Environment variables
+.env
+
+# Firebase service account
+serviceAccountKey.json

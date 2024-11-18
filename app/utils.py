@@ -1,4 +1,5 @@
 # utils.py
+import os
 import logging
 from datetime import datetime
 from brevo_python import Configuration, ApiClient, TransactionalEmailsApi, SendSmtpEmail
@@ -16,8 +17,13 @@ logger = logging.getLogger(__name__)
 # Brevo Configuration
 configuration = Configuration()
 
-# Temporarily add your actual Brevo API key here for testing purposes
-configuration.api_key['api-key'] = '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'
+configuration.api_key['api-key'] = os.getenv('BREVO_API_KEY')
+
+if not configuration.api_key['api-key']:
+    logger.error("Brevo API key not found in environment variables.")
+    raise ValueError("Brevo API key is missing.")
+
+
 
 api_client = ApiClient(configuration)
 api_instance = TransactionalEmailsApi(api_client)
