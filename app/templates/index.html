@@ -1,0 +1,88 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hello Tabeeb Lab Tests Booking</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div style="max-width: 800px; margin: 20px auto;">
+          {% for category, message in messages %}
+            <div class="flash-message {{ category }}">
+              {{ message }}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+    
+    <!-- Header -->
+    <h1 class="first">
+        Up to <span style="color: #4782DE;">30%</span> Discount on all Lab tests of<br>Chughtai Lab
+    </h1>
+    
+    <!-- Booking Form -->
+    <form id="lab-test-form" action="{{ url_for('main.book') }}" method="POST">
+        <!-- Patient Name -->
+        <label for="patient-name">Patient Name:</label>
+        <input type="text" id="patient-name" name="patient-name" required><br><br>
+
+        <!-- Phone Number -->
+        <label for="phone-number">Phone Number:</label>
+        <input type="tel" id="phone-number" name="phone-number" required><br><br>
+
+        <!-- Email -->
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required><br><br>
+
+        <!-- Test Selection -->
+        <div class="test-container">
+            <label for="test-search">Search Test:</label>
+            <input type="text" id="test-search" name="test-search" placeholder="Search for a test...">
+
+            <h2>Select Tests</h2>
+
+                        <!-- Filter by Discount -->
+            <div class="discount-filters">
+             
+                <div class="filter-buttons">
+                    <button type="button" class="filter-button" data-discount="20">20%</button>
+                    <button type="button" class="filter-button" data-discount="30">30%</button>
+                </div>
+            </div>
+
+            
+            <div id="test-list" class="test-cards-container">
+                <!-- Loading Spinner -->
+                <div class="loading-spinner" id="loading-spinner"></div>
+                <!-- Test cards will be populated here by app.js -->
+            </div>
+        </div>
+
+        <!-- Selected Tests -->
+        <div id="selected-tests-container">
+            <h3>Selected Tests</h3>
+            <ul id="selected-tests-list">
+                <!-- Selected tests will appear here -->
+            </ul>
+            <div id="total-amount">
+                <strong>Total Amount: </strong><span id="total-fee">Rs.0</span>
+            </div>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit">Confirm Booking</button>
+    </form>
+    
+    <!-- Optional: Include an icon library like Font Awesome for better icons -->
+    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"> -->
+
+    <!-- JavaScript -->
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

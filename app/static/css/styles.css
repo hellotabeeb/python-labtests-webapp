@@ -1,0 +1,578 @@
+/* styles.css */
+
+/* Reset and basic styles */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html, body {
+    overflow-x: hidden;
+    width: 100%;
+    position: relative;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+    padding: 20px;
+}
+
+h1.first {
+    text-align: center;
+    color: #2c3e50;
+    margin-bottom: 30px;
+    width: 100%;
+    font-size: 24px;
+}
+
+form {
+    background: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 800px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+input, select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.test-container {
+    margin-bottom: 20px;
+    position: relative;
+}
+
+#test-search {
+    margin-bottom: 15px;
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+h2 {
+    margin-bottom: 10px;
+    color: #2c3e50;
+}
+
+#test-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 20px;
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    height: 600px; /* Specific height to display ~7-8 tests */
+    overflow-y: auto; /* Make the list scrollable */
+}
+
+/* Scrollbar Styling (Optional) */
+#test-list::-webkit-scrollbar {
+    width: 8px;
+}
+
+#test-list::-webkit-scrollbar-thumb {
+    background-color: var(--brand-color);
+    border-radius: 4px;
+}
+
+.test-card {
+    position: relative;
+    background: #fff;
+    border: 2px solid #e0e0e0; /* Increased border width */
+    border-radius: 8px;
+    width: 100%;
+    padding: 20px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    transition: box-shadow 0.3s ease, border-color 0.3s ease, border-width 0.3s ease;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.test-card:hover {
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+
+.test-card.selected {
+    border-color: var(--brand-color);
+    border-width: 3px; /* Increased border width when selected */
+}
+
+/* Test Name Adjustment */
+.test-card .test-name {
+    font-weight: bold;
+    color: var(--brand-color); /* Brand color for test name */
+    margin-top: 20px;          /* Added top margin */
+    margin-bottom: 10px;
+    font-size: 18px;
+}
+
+/* Tick Icon Adjustment */
+.test-card .tick-icon {
+    position: absolute;
+    bottom: 10px; /* Moved to bottom-left */
+    left: 10px;   /* Moved to bottom-left */
+    display: none;
+    color: var(--brand-color); /* Brand color for tick */
+    font-size: 20px;
+    z-index: 2; /* Ensures it stays above the discount tag */
+}
+
+/* Discount Tag Adjustment */
+.discount-tag {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: var(--brand-color); /* Brand color */
+    color: #fff;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    z-index: 1; /* Ensures it stays above other elements if necessary */
+}
+
+/* ... existing styles ... */
+
+/* Responsive Styles */
+
+/* Responsive styles for tablets */
+@media (max-width: 768px) {
+    /* ... existing responsive styles ... */
+
+    /* Adjust Tick Icon Position */
+    .test-card .tick-icon {
+        bottom: 10px;
+        left: 10px;
+    }
+
+    /* Adjust Test Name Margin */
+    .test-card .test-name {
+        margin-top: 15px; /* Adjust as needed for tablet view */
+    }
+}
+
+/* Responsive styles for mobile devices */
+@media (max-width: 480px) {
+    /* ... existing responsive styles ... */
+
+    /* Adjust Tick Icon Position */
+    .test-card .tick-icon {
+        bottom: 8px;
+        left: 8px;
+    }
+
+    /* Adjust Test Name Margin */
+    .test-card .test-name {
+        margin-top: 10px; /* Adjust as needed for mobile view */
+    }
+}
+
+.test-card:hover {
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+
+.test-card.selected {
+    border-color: var(--brand-color);
+    border-width: 3px; /* Increased border width when selected */
+}
+
+.test-card .test-name {
+    font-weight: bold;
+    color: var(--brand-color); /* Brand color for test name */
+    margin-top: 20px;          /* Added top margin */
+    margin-bottom: 10px;
+    font-size: 18px;
+}
+
+.test-card .original-price {
+    color: #888;
+    text-decoration: line-through;
+    margin-bottom: 5px;
+    font-size: 0.9em;
+}
+
+.test-card .discounted-price {
+    color: var(--brand-color); /* Brand color for discounted price */
+    font-weight: bold;
+    margin-bottom: 10px;
+    font-size: 1em;
+}
+
+.discount-tag {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: var(--brand-color); /* Brand color */
+    color: #fff;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+.test-card .tick-icon {
+    position: absolute;
+    bottom: 10px;  /* Changed from top to bottom */
+    left: 10px;    /* Changed from right to left */
+    display: none;
+    color: var(--brand-color); /* Brand color for tick */
+    font-size: 20px;
+}
+
+.test-card.selected .tick-icon {
+    display: block;
+}
+
+#selected-tests-container {
+    margin-top: 25px;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    max-width: 95%;
+    background: white;
+}
+
+#selected-tests-container h3 {
+    margin-bottom: 10px;
+    color: #2c3e50;
+}
+
+#selected-tests-list {
+    list-style: none;
+    margin-bottom: 10px;
+}
+
+#selected-tests-list li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 5px;
+    padding: 5px 0;
+    border-bottom: 1px solid #eee;
+    font-size: 14px;
+}
+
+#selected-tests-list li .remove-test {
+    background: #ff4444;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+}
+
+#selected-tests-list li .remove-test:hover {
+    background: #cc0000;
+}
+
+#total-amount {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 2px solid #eee;
+    text-align: right;
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+button[type="submit"] {
+    display: block;
+    margin: 20px auto 0 auto;
+    padding: 12px 24px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+button[type="submit"]:hover {
+    background-color: #0056b3;
+}
+
+.loading-spinner {
+    display: none; /* Hidden by default */
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.loading-spinner.visible {
+    display: flex;
+}
+
+.loading-spinner::after {
+    content: "";
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid var(--brand-color); /* Brand color */
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.price-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+:root {
+    --brand-color: #4782DE; /* Defined brand color */
+}
+
+.discount-filters {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.discount-filter.active:hover {
+    background: #3671cd; /* Hover brand color */
+    color: white;
+}
+
+.discount-filter {
+    padding: 8px 16px;
+    border: 1px solid var(--brand-color);
+    border-radius: 4px;
+    background: white;
+    color: var(--brand-color);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.discount-filter:hover {
+    background: #eef3fc; /* Light brand color */
+    color: var(--brand-color);
+}
+
+.discount-filter.active {
+    background: var(--brand-color);
+    color: white;
+    box-shadow: 0 2px 4px rgba(71, 130, 222, 0.2);
+}
+
+.discount-badge {
+    background: var(--brand-color);
+    color: white;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.8em;
+    margin-left: 8px;
+}
+
+.test-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;  /* Spacing between test name and discount badge */
+    flex: 1;    /* Take up available space */
+}
+
+.loading-indicator {
+    text-align: center;
+    padding: 20px;
+    display: none;
+}
+
+.loading-indicator.visible {
+    display: block;
+}
+
+
+.flash-message {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 10px;
+    border-radius: 4px;
+}
+
+.flash-message.error {
+    color: #721c24;
+    background-color: #f8d7da;
+}
+
+.flash-message.success {
+    color: #155724;
+    background-color: #d4edda;
+}
+
+
+/* Filter Buttons */
+.discount-filters {
+    margin-bottom: 15px;
+}
+
+.filter-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 5px;
+}
+
+.filter-button {
+    padding: 10px 20px; /* Increased padding for larger size */
+    min-width: 100px;   /* Ensures a minimum width */
+    height: 40px;       /* Sets a fixed height */
+    border: 1px solid #ccc;
+    background-color: #fff;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;    /* Increased font size for better readability */
+    transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Added shadow */
+}
+
+
+.filter-button.active {
+    background-color: var(--brand-color);
+    color: #fff;
+    border-color: var(--brand-color);
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15); /* Enhanced shadow on hover */
+
+}
+
+/* Responsive styles for tablets */
+@media (max-width: 768px) {
+    /* Reduce font sizes in test cards */
+    .test-card .test-name {
+        font-size: 16px;
+    }
+
+
+      /* Increase the width of test cards */
+      .test-card {
+        width: 100%; /* Full width */
+        /* Optional: Adjust padding if needed */
+        padding: 15px;
+    }
+
+    /* Optionally, adjust the container if there are side paddings */
+    #test-list {
+        padding: 10px;
+    }
+    
+    .test-card .original-price,
+    .test-card .discounted-price {
+        font-size: 14px;
+    }
+
+    /* Increase form width and remove side gaps */
+    form {
+        width: 90%;
+        max-width: none;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    /* Adjust discount tag positioning */
+    .discount-tag {
+        top: 10px;
+        right: 10px;
+        font-size: 12px;
+        padding: 5px 8px;
+    }
+
+    /* Center the submit button */
+    button[type="submit"] {
+        display: block;
+        margin: 20px auto 0 auto;
+        width: 50%;
+        padding: 10px 0;
+        font-size: 16px;
+    }
+
+    /* Shorten top margin for better spacing */
+    h1.first {
+        margin-bottom: 20px;
+        font-size: 18px;
+    }
+}
+
+/* Responsive styles for mobile devices */
+@media (max-width: 480px) {
+    /* Further reduce font sizes in test cards */
+    .test-card .test-name {
+        font-size: 14px;
+    }
+
+    .test-card {
+        width: 100%; /* Full width */
+        /* Optional: Adjust padding if needed */
+        padding: 10px;
+    }
+
+    /* Optionally, adjust the container if there are side paddings */
+    #test-list {
+        padding: 5px;
+    }
+
+    .test-card .original-price,
+    .test-card .discounted-price {
+        font-size: 12px;
+    }
+
+    /* Increase form width to almost full */
+    form {
+        width: 100%;
+        padding: 15px;
+    }
+
+    /* Adjust discount tag positioning */
+    .discount-tag {
+        top: 8px;
+        right: 8px;
+        font-size: 10px;
+        padding: 4px 6px;
+    }
+
+    /* Center and expand the submit button */
+    button[type="submit"] {
+        width: 70%;
+        padding: 12px 0;
+        font-size: 14px;
+    }
+
+    /* Shorten top margin for better spacing */
+    h1.first {
+        margin-bottom: 15px;
+        font-size: 16px;
+    }
+}
