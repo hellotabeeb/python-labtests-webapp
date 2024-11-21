@@ -1,27 +1,36 @@
+# app/__init__.py
 import os
-import json
 from flask import Flask
-from firebase_admin import credentials, initialize_app, firestore
+import firebase_admin
+from firebase_admin import credentials, initialize_app
+from firebase_admin import firestore
 
+# Initialize Firebase and Firestore at module level
+cred = None
 db = None
 
 def create_app():
     app = Flask(__name__)
-    app.config['SECRET_KEY'] = '1234567'  # Replace with your actual secret key or use environment variable
+    app.config['SECRET_KEY'] = '1234567'
+    
+    # Get absolute path to service account key
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    service_account_key_path = os.path.join(base_dir, 'serviceAccountKey.json')
 
-    # Load Firebase credentials from environment variable
-    service_account_info = os.getenv('SERVICE_ACCOUNT_KEY')
-    if not service_account_info:
-        raise ValueError("Firebase credentials not found in environment variables.")
+    if not os.path.exists(service_account_key_path):
+        raise FileNotFoundError(f"Firebase credentials file not found at: {service_account_key_path}")
 
-    try:
-        cred = credentials.Certificate(json.loads(service_account_info))
-        firebase_app = initialize_app(cred)
-        global db
+    # Initialize Firebase globally
+    global cred, db
+    if not firebase_admin._apps:
+        cred = credentials.Certificate(service_account_key_path)
+        firebase_admin.initialize_app(cred)
+    
+    # Initialize Firestore globally
+    if db is None:
         db = firestore.client()
-    except json.JSONDecodeError as e:
-        raise ValueError("Invalid JSON in SERVICE_ACCOUNT_KEY environment variable.") from e
 
+    # Register blueprints
     from .routes import main
     app.register_blueprint(main)
 

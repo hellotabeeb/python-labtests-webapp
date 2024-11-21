@@ -54,7 +54,7 @@ def move_code_to_availed(name, phone, email, selected_tests):
 
         # Access the top-level 'codes' collection
         codes_ref = db.collection('codes')
-        code_docs = codes_ref.where('isUsed', '==', False).limit(1).get()
+        code_docs = codes_ref.where('isUsed', '==', 'false').limit(1).get()
 
         if not code_docs:
             logger.warning("No available booking codes found.")
