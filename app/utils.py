@@ -23,8 +23,6 @@ if not configuration.api_key['api-key']:
     logger.error("Brevo API key not found in environment variables.")
     raise ValueError("Brevo API key is missing.")
 
-
-
 api_client = ApiClient(configuration)
 api_instance = TransactionalEmailsApi(api_client)
 
@@ -56,7 +54,7 @@ def move_code_to_availed(name, phone, email, selected_tests):
 
         # Access the top-level 'codes' collection
         codes_ref = db.collection('codes')
-        code_docs = codes_ref.where('isUsed', '==', 'false').limit(1).get()
+        code_docs = codes_ref.where('isUsed', '==', False).limit(1).get()
 
         if not code_docs:
             logger.warning("No available booking codes found.")
@@ -76,6 +74,9 @@ def move_code_to_availed(name, phone, email, selected_tests):
         codes_ref.document(code_doc.id).delete()
         logger.info(f"Deleted code {code} from 'codes' collection.")
 
+        # Define discount percentage
+        DISCOUNT_PERCENTAGE = 10  # 10% discount
+
         # Fetch selected test details
         tests_details = []
         tests_ref = db.collection('labs').document('chughtaiLab').collection('tests')
@@ -83,9 +84,12 @@ def move_code_to_availed(name, phone, email, selected_tests):
             test_doc = tests_ref.document(test_id).get()
             if test_doc.exists:
                 test_data = test_doc.to_dict()
+                original_fee = float(test_data.get('Fees', '0.00'))
+                discounted_fee = original_fee * (1 - DISCOUNT_PERCENTAGE / 100)
                 tests_details.append({
                     'name': test_data.get('Name', 'N/A'),
-                    'fee': f"Rs.{test_data.get('Fees', '0.00')}"
+                    'original_fee': f"Rs.{original_fee:.2f}",
+                    'discounted_fee': f"Rs.{discounted_fee:.2f}"
                 })
                 logger.info(f"Fetched test: {test_data.get('Name', 'N/A')}")
             else:
@@ -96,7 +100,8 @@ def move_code_to_availed(name, phone, email, selected_tests):
         availed_ref.add({
             'availableAt': datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'),
             'code': code,
-            'testFee': ', '.join([test['fee'] for test in tests_details]),
+            'testFee': ', '.join([test['original_fee'] for test in tests_details]),
+            'discountedTestFee': ', '.join([test['discounted_fee'] for test in tests_details]),
             'testName': ', '.join([test['name'] for test in tests_details]),
             'userEmail': email,
             'userName': name,
@@ -114,13 +119,18 @@ def generate_email_template(name, tests_details, discount_code):
     Generates the HTML email content using the provided template.
     """
     tests_html = ''.join([
-        f"<li><strong>Test:</strong> {test['name']}</li>"
-        f"<li><strong>Fee:</strong> {test['fee']}</li>"
+        f"""
+        <li>
+            <strong>Test:</strong> {test['name']}<br>
+            <strong>Fee:</strong> <span style="text-decoration: line-through; color: #a0a0a0;">{test['original_fee']}</span>
+            <span style="color: #e74c3c; font-weight: bold;"> {test['discounted_fee']}</span>
+        </li>
+        """
         for test in tests_details
     ])
 
     return f"""
-        <html>
+    <html>
         <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
             <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
                 <h2 style="color: #2c3e50;">Lab Test Booking Confirmation</h2>
@@ -146,7 +156,7 @@ def generate_email_template(name, tests_details, discount_code):
                 </p>
             </div>
         </body>
-        </html>
+    </html>
     """
 
 def send_email(email, name, tests_details, code):

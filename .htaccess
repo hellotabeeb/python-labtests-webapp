@@ -1,0 +1,3 @@
+AddHandler wsgi-script .py
+WSGIScriptAlias / /home/bentobox/hellotabeeb.pk/labTests/run.py
+WSGICallableObject application
