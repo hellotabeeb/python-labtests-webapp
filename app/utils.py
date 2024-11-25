@@ -148,7 +148,7 @@ def generate_email_template(name, tests_details, discount_code):
                 
                 <!-- Book Again Button -->
                 <div style="text-align: center; margin: 30px 0;">
-                    <a href="https://hellotabeeb.com" 
+                    <a href="https://hellotabeeb.pk" 
                        style="background-color: #2c3e50; 
                               color: white; 
                               padding: 12px 30px; 
