@@ -153,8 +153,9 @@ def generate_email_template(name, tests_details, discount_code):
 def calculate_discounted_fee(test):
     special_tests = ["Lipid Profile", "Serum 25-OH Vitamin D", "Glycosylated Hemoglobin (HbA1c)"]
     discount_rate = 0.3 if test['name'] in special_tests else 0.2
-    discounted_fee = test['original_fee'] * (1 - discount_rate)
-    return f"{discounted_fee:.2f}"
+    original_fee = float(test['original_fee'].replace('Rs.', ''))
+    discounted_fee = original_fee * (1 - discount_rate)
+    return f"Rs.{discounted_fee:.2f}"
 
 
 def send_email(email, name, tests_details, code):
