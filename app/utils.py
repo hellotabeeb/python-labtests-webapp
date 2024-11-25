@@ -118,12 +118,14 @@ def generate_email_template(name, tests_details, discount_code):
     """
     Generates the HTML email content using the provided template.
     """
+    special_tests = ["Lipid Profile", "Serum 25-OH Vitamin D", "Glycosylated Hemoglobin (HbA1c)"]
+    
     tests_html = ''.join([
         f"""
         <li>
             <strong>Test:</strong> {test['name']}<br>
             <strong>Fee:</strong> <span style="text-decoration: line-through; color: #a0a0a0;">{test['original_fee']}</span>
-            <span style="color: #e74c3c; font-weight: bold;"> {test['discounted_fee']}</span>
+            <span style="color: #e74c3c; font-weight: bold;"> {calculate_discounted_fee(test)}</span>
         </li>
         """
         for test in tests_details
@@ -139,25 +141,21 @@ def generate_email_template(name, tests_details, discount_code):
                 <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0;">
                     <h3 style="margin-top: 0;">Booking Details:</h3>
                     <ul style="list-style-type: none; padding-left: 0;">
-                        {tests_html}
-                        <li style="margin-top: 10px;"><strong>Your Discount Code:</strong> 
-                            <span style="background-color: #e9ecef; padding: 5px 10px; border-radius: 3px;">
-                                {discount_code}
-                            </span>
-                        </li>
+                    {tests_html}
                     </ul>
                 </div>
-                <p><strong>Important:</strong> Please keep this code safe as it can only be used once.</p>
-                <p>Please show this email at the lab during your visit.</p>
-                <hr style="border-top: 1px solid #eee; margin: 20px 0;">
-                <p style="color: #666; font-size: 14px;">
-                    Best regards,<br>
-                    HelloTabeeb Lab Services Team
-                </p>
+                <p>Your discount code: {discount_code}</p>
             </div>
         </body>
     </html>
     """
+
+def calculate_discounted_fee(test):
+    special_tests = ["Lipid Profile", "Serum 25-OH Vitamin D", "Glycosylated Hemoglobin (HbA1c)"]
+    discount_rate = 0.3 if test['name'] in special_tests else 0.2
+    discounted_fee = test['original_fee'] * (1 - discount_rate)
+    return f"{discounted_fee:.2f}"
+
 
 def send_email(email, name, tests_details, code):
     """
