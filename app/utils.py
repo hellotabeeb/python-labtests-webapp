@@ -145,6 +145,29 @@ def generate_email_template(name, tests_details, discount_code):
                     </ul>
                 </div>
                 <p>Your discount code: {discount_code}</p>
+                
+                <!-- Book Again Button -->
+                <div style="text-align: center; margin: 30px 0;">
+                    <a href="https://hellotabeeb.com" 
+                       style="background-color: #2c3e50; 
+                              color: white; 
+                              padding: 12px 30px; 
+                              text-decoration: none; 
+                              border-radius: 5px; 
+                              font-weight: bold;
+                              display: inline-block;
+                              box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                              transition: background-color 0.3s ease;">
+                        Book Again
+                    </a>
+                </div>
+
+                <!-- Support Information -->
+                <div style="text-align: center; margin-top: 30px; padding: 20px; border-top: 1px solid #eee;">
+                    <p style="margin: 0;">For support or to Book Home sampling, please call us at</p>
+                    <p style="font-size: 18px; font-weight: bold; color: #2c3e50; margin: 10px 0;">0337 4373334</p>
+                    <p style="margin: 0;">ThankYou!</p>
+                </div>
             </div>
         </body>
     </html>
