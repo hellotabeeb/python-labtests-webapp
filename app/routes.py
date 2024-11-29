@@ -1,7 +1,10 @@
 from flask import Blueprint, render_template, request, redirect, url_for, jsonify, flash
 from .utils import send_email, move_code_to_availed
-from flask import current_app as app
+from flask import current_app
 import logging
+import firebase_admin
+from firebase_admin import firestore
+
 
 main = Blueprint('main', __name__)
 
@@ -54,7 +57,7 @@ def book():
             code = 'IDC'
             
             # Fetch test details for selected IDC tests
-            db = app.db
+            db = firestore.client()
             tests_ref = db.collection('labs/IDC/tests')
             tests_details = []
             
@@ -94,24 +97,25 @@ def book():
 def get_tests():
     logger = logging.getLogger(__name__)
     try:
-        # Get the lab parameter from the query string
+        # Attempt to get the Firestore client, initializing if necessary
+        try:
+            db = firestore.client()
+        except Exception as init_error:
+            logger.error(f"Failed to get Firestore client: {init_error}")
+            return jsonify({"error": "Database initialization failed"}), 500
+
+        # Rest of the existing function remains the same...
         lab = request.args.get('lab', 'chughtai-lab')
         
-        # Mapping lab selection to Firestore collection
         lab_collection_map = {
             'chughtai-lab': 'labs/chughtaiLab/tests',
             'idc-islamabad': 'labs/IDC/tests'
         }
         
-        # Validate lab selection
         if lab not in lab_collection_map:
             logger.warning(f"Invalid lab selection: {lab}")
             return jsonify({"error": "Invalid lab selection"}), 400
         
-        # Get Firestore instance
-        db = app.db
-        
-        # Fetch tests from the specific lab's collection
         collection_path = lab_collection_map[lab]
         logger.info(f"Fetching tests from collection path: {collection_path}")
         tests_ref = db.collection(collection_path)
