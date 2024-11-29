@@ -125,53 +125,65 @@ def generate_email_template(name, tests_details, discount_code):
         <li>
             <strong>Test:</strong> {test['name']}<br>
             <strong>Fee:</strong> <span style="text-decoration: line-through; color: #a0a0a0;">{test['original_fee']}</span>
-            <span style="color: #e74c3c; font-weight: bold;"> {calculate_discounted_fee(test)}</span>
+            <span style="color: #e74c3c; font-weight: bold;"> {test['discounted_fee']}</span>
         </li>
         """
         for test in tests_details
     ])
 
-    return f"""
-    <html>
-        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-            <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-                <h2 style="color: #2c3e50;">Lab Test Booking Confirmation</h2>
-                <p>Dear {name},</p>
-                <p>Thank you for booking your lab test with HelloTabeeb. Your booking has been confirmed.</p>
-                <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0;">
-                    <h3 style="margin-top: 0;">Booking Details:</h3>
-                    <ul style="list-style-type: none; padding-left: 0;">
-                    {tests_html}
-                    </ul>
-                </div>
-                <p>Your discount code: {discount_code}</p>
-                
-                <!-- Book Again Button -->
-                <div style="text-align: center; margin: 30px 0;">
-                    <a href="https://hellotabeeb.pk" 
-                       style="background-color: #2c3e50; 
-                              color: white; 
-                              padding: 12px 30px; 
-                              text-decoration: none; 
-                              border-radius: 5px; 
-                              font-weight: bold;
-                              display: inline-block;
-                              box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                              transition: background-color 0.3s ease;">
-                        Book Again
-                    </a>
-                </div>
+    # Add specific handling for IDC code
+    code_section = f"<p>Your code: {discount_code}" if discount_code != 'IDC' else "<p>Your lab test is booked with IDC Islamabad</p>"
 
-                <!-- Support Information -->
-                <div style="text-align: center; margin-top: 30px; padding: 20px; border-top: 1px solid #eee;">
-                    <p style="margin: 0;">For support or to Book Home sampling, please call us at</p>
-                    <p style="font-size: 18px; font-weight: bold; color: #2c3e50; margin: 10px 0;">0337 4373334</p>
-                    <p style="margin: 0;">ThankYou!</p>
+
+    return f"""
+        <html>
+            <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+                <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+                    <h2 style="color: #2c3e50;">Lab Test Booking Confirmation</h2>
+                    <p>Dear {name},</p>
+                    <p>Thank you for booking your lab test with HelloTabeeb. Your booking has been confirmed.</p>
+                    <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                        <h3 style="margin-top: 0;">Booking Details:</h3>
+                        <ul style="list-style-type: none; padding-left: 0;">
+                        {tests_html}
+                        </ul>
+                    </div>
+                    {code_section}
+                    <p>Your discount code: {discount_code}</p>
+                    
+                    <!-- Book Again Button -->
+                    <div style="text-align: center; margin: 30px 0;">
+                        <a href="https://hellotabeeb.pk" 
+                           style="background-color: #2c3e50; 
+                                  color: white; 
+                                  padding: 12px 30px; 
+                                  text-decoration: none; 
+                                  border-radius: 5px; 
+                                  font-weight: bold;
+                                  display: inline-block;
+                                  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                                  transition: background-color 0.3s ease;">
+                            Book Again
+                        </a>
+                    </div>
+    
+                    <!-- Support Information -->
+                    <div style="text-align: center; margin-top: 30px; padding: 20px; border-top: 1px solid #eee;">
+                        <p style="margin: 0;">For support or to Book Home sampling, please call us at</p>
+                        <p style="font-size: 18px; font-weight: bold; color: #2c3e50; margin: 10px 0;">0337 4373334</p>
+                        <p style="margin: 0;">ThankYou!</p>
+                    </div>
+    
+                    <!-- Show this mail at the Lab -->
+                    <div style="text-align: center; margin-top: 30px; padding: 20px; border-top: 1px solid #eee;">
+                        <p style="font-size: 20px; font-weight: bold; color: #2c3e50; margin: 10px 0;">
+                            Show this mail at the Lab during your visit or home sampling to avail discount
+                        </p>
+                    </div>
                 </div>
-            </div>
-        </body>
-    </html>
-    """
+            </body>
+        </html>
+        """
 
 def calculate_discounted_fee(test):
     special_tests = ["Lipid Profile", "Serum 25-OH Vitamin D", "Glycosylated Hemoglobin (HbA1c)"]
