@@ -522,7 +522,7 @@ button[type="submit"]:hover {
     /* Shorten top margin for better spacing */
     h1.first {
         margin-bottom: 20px;
-        font-size: 18px;
+        font-size: 16px;
     }
 }
 
@@ -573,6 +573,6 @@ button[type="submit"]:hover {
     /* Shorten top margin for better spacing */
     h1.first {
         margin-bottom: 15px;
-        font-size: 16px;
+        font-size: 14px;
     }
 }
