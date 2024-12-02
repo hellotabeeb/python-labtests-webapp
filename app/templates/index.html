@@ -40,15 +40,36 @@
         <label for="email">Email:</label>
         <input type="email" id="email" name="email" required><br><br>
 
-        <!-- Select Lab -->
+              <!-- Select Lab -->
         <label for="lab-select">Select Lab:</label>
-        <select id="lab-select" name="lab-select" required>
-            <option value="" disabled selected>Select a lab</option>
-            <option value="chughtai-lab">Chughtai Lab</option>
-            <option value="idc-islamabad">IDC (Islamabad Diagnostic Center)</option>
-            <option value="dr-issa-lab">Dr. Issa Lab <span style="color: rgb(199, 199, 199);">(coming soon)</span></option>
-            <option value="another-lab">Excel Lab <span style="color: rgb(199, 199, 199);">(coming soon)</span></option>
-        </select><br><br>
+        <div class="custom-select-wrapper">
+            <div class="custom-select">
+                <div class="custom-select-trigger">
+                    <span>Select a lab</span>
+                    <div class="arrow"></div>
+                </div>
+                <div class="custom-options">
+                    <span class="custom-option" data-value="chughtai-lab">
+                        <img src="static/download (2).png" alt="Chughtai Lab"> Chughtai Lab
+                    </span>
+                    <span class="custom-option" data-value="idc-islamabad">
+                        <img src="static/1.PNG" alt="IDC Islamabad"> IDC (Islamabad Diagnostic Center)
+                    </span>
+                    <span class="custom-option" data-value="dr-issa-lab">
+                        <img src="static/2.png" alt="IDC Islamabad">  Dr. Issa Lab <span style="color: rgb(199, 199, 199);">(coming soon)</span>
+                    </span>
+                    <span class="custom-option" data-value="another-lab">
+                        <img src="static/excel.png" alt="IDC Islamabad"> Excel Lab <span style="color: rgb(199, 199, 199);">(coming soon)</span>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <input type="hidden" id="lab-select" name="lab-select" required>
+        <br><br>
+
+
+
+           
 
         <!-- Test Selection -->
         <div id="test-selection-container" class="test-container" style="display: none;">

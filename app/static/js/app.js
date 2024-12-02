@@ -1,5 +1,8 @@
 document.addEventListener('DOMContentLoaded', function() {
-    const labSelect = document.getElementById('lab-select');
+    const customSelect = document.querySelector('.custom-select');
+    const customSelectTrigger = document.querySelector('.custom-select-trigger');
+    const customOptions = document.querySelectorAll('.custom-option');
+    const hiddenInput = document.getElementById('lab-select');
     const testSelectionContainer = document.getElementById('test-selection-container');
     const comingSoonMessage = document.getElementById('coming-soon-message');
     const testSearch = document.getElementById('test-search');
@@ -309,10 +312,32 @@ document.addEventListener('DOMContentLoaded', function() {
         displayTests(filteredTests);
     }
     
-    // Event listener for lab selection
-    labSelect.addEventListener('change', function() {
-        const selectedLab = labSelect.value;
-        
+    // Event listener for custom select
+    customSelectTrigger.addEventListener('click', function() {
+        customSelect.classList.toggle('open');
+    });
+
+    customOptions.forEach(option => {
+        option.addEventListener('click', function() {
+            const value = option.getAttribute('data-value');
+            const text = option.innerHTML;
+            hiddenInput.value = value;
+            customSelectTrigger.querySelector('span').innerHTML = text;
+            customSelect.classList.remove('open');
+            
+            // Trigger change event for lab selection
+            handleLabSelection(value);
+        });
+    });
+
+    document.addEventListener('click', function(e) {
+        if (!customSelect.contains(e.target)) {
+            customSelect.classList.remove('open');
+        }
+    });
+
+    // Function to handle lab selection
+    function handleLabSelection(selectedLab) {
         // Reset selected tests and total amount
         selectedTests.clear();
         totalAmount = 0;
@@ -329,5 +354,5 @@ document.addEventListener('DOMContentLoaded', function() {
             testSelectionContainer.style.display = 'none';
             comingSoonMessage.style.display = 'block';
         }
-    });
+    }
 });
