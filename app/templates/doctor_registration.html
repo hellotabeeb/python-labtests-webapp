@@ -1,0 +1,55 @@
+<!-- templates/doctor_registration.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Registration</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/doctor_registration.css') }}">
+</head>
+<body>
+    <h1 class="h">Doctor Registration</h1>
+    <form id="doctor-registration-form">
+        <!-- Image Upload -->
+        <label for="doctor-image">Upload Image:</label>
+        <input type="file" id="doctor-image" name="doctor-image" accept="image/*" required><br><br>
+
+        <!-- Full Name -->
+        <label for="full-name">Full Name:</label>
+        <input type="text" id="full-name" name="full-name" required><br><br>
+
+        <!-- Phone Number -->
+        <label for="phone-number">Phone Number:</label>
+        <input type="tel" id="phone-number" name="phone-number" required><br><br>
+
+        <!-- Email -->
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required><br><br>
+
+        <!-- Hospital or Clinic -->
+        <label for="hospital-clinic">Hospital/Clinic:</label>
+        <input type="text" id="hospital-clinic" name="hospital-clinic" required><br><br>
+
+        <!-- Designation -->
+        <label for="designation">Designation:</label>
+        <input type="text" id="designation" name="designation" required><br><br>
+
+        <!-- Study or Specialization -->
+        <label for="specialization">Study/Specialization:</label>
+        <input type="text" id="specialization" name="specialization" required><br><br>
+
+        <!-- FCPS Number -->
+        <label for="fcps-number">FCPS Number:</label>
+        <input type="text" id="fcps-number" name="fcps-number" required><br><br>
+
+        <!-- Experience in Numbers -->
+        <label for="experience">Experience (in years):</label>
+        <input type="number" id="experience" name="experience" required><br><br>
+
+        <!-- Submit Button -->
+        <button type="submit">Submit</button>
+    </form>
+
+    <script src="{{ url_for('static', filename='js/doctor_registration.js') }}"></script>
+</body>
+</html>
