@@ -4,6 +4,7 @@ from flask import current_app
 import logging
 import firebase_admin
 from firebase_admin import firestore
+from . import db
 
 
 main = Blueprint('main', __name__)
@@ -13,6 +14,28 @@ def index():
     logger = logging.getLogger(__name__)
     logger.info("Index route accessed.")
     return render_template('index.html')
+
+@main.route('/doctor-registration')
+def doctor_registration():
+    return render_template('doctor_registration.html')
+
+@main.route('/register-doctor', methods=['POST'])
+def register_doctor():
+    try:
+        data = request.form.to_dict()
+        logger = logging.getLogger(__name__)
+        logger.info(f"Received doctor registration data: {data}")
+
+        # Save data to Firestore
+        doc_ref = db.collection('newDoctorRegistration').document()
+        doc_ref.set(data)
+
+        return jsonify({"success": True, "message": "Doctor registered successfully."}), 200
+    except Exception as e:
+        logger.error(f"Error registering doctor: {e}")
+        return jsonify({"success": False, "message": "Failed to register doctor."}), 500
+    
+    
 
 @main.route('/book', methods=['POST'])
 def book():
