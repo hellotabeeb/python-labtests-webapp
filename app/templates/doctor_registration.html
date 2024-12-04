@@ -1,54 +1,206 @@
-<!-- templates/doctor_registration.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Doctor Registration</title>
+    <title>HelloTabeeb - Doctor Registration</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/doctor_registration.css') }}">
 </head>
 <body>
-    <h1 class="h">Doctor Registration</h1>
-    <form id="doctor-registration-form">
-        <!-- Image Upload -->
-        <label for="doctor-image">Upload Image:</label>
-        <input type="file" id="doctor-image" name="doctor-image" accept="image/*" required><br><br>
+    <div class="container">
+        <header class="header">
+            <div class="logo-container">
+                <a href="{{ url_for('main.doctor_registration') }}">
+                    <img src="static/121.png" alt="logo" class="logo">
+                </a>
+            </div>
+            
+            <div class="startup-headline">
+                <h2>Become a Part of Pakistan's Fastest Growing Healthcare Startup Team</h2>
+            </div>
+        </header>
 
-        <!-- Full Name -->
-        <label for="full-name">Full Name:</label>
-        <input type="text" id="full-name" name="full-name" required><br><br>
+        <div class="description-section">
+            <p class="description">
+                Join HelloTabeeb and connect with patients seamlessly. Our platform empowers healthcare professionals 
+                to expand their reach, manage appointments, and provide exceptional care through innovative digital solutions.
+            </p>
+        </div>
 
-        <!-- Phone Number -->
-        <label for="phone-number">Phone Number:</label>
-        <input type="tel" id="phone-number" name="phone-number" required><br><br>
+        <form id="doctor-registration-form" action="{{ url_for('main.register_doctor') }}" method="POST" enctype="multipart/form-data">
+            <div class="form-grid">
+                <!-- Personal Information -->
+                <div class="form-section">
+                    <h2>Personal Information</h2>
+                    <div class="input-group">
+                        <label for="full-name">Full Name</label>
+                        <input type="text" id="full-name" name="full-name" required>
+                    </div>
 
-        <!-- Email -->
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email" required><br><br>
+                    <div class="input-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
 
-        <!-- Hospital or Clinic -->
-        <label for="hospital-clinic">Hospital/Clinic:</label>
-        <input type="text" id="hospital-clinic" name="hospital-clinic" required><br><br>
+                    <div class="input-group">
+                        <label for="phone-number">Phone Number</label>
+                        <input type="tel" id="phone-number" name="phone-number" required>
+                    </div>
+                </div>
 
-        <!-- Designation -->
-        <label for="designation">Designation:</label>
-        <input type="text" id="designation" name="designation" required><br><br>
+                <!-- Professional Information -->
+                <div class="form-section">
+                    <h2>Professional Details</h2>
+                    <div class="input-group">
+                        <label for="pmdc-number">PMDC Number</label>
+                        <input type="text" id="pmdc-number" name="pmdc-number" pattern="\d{6}" maxlength="6" minlength="6" placeholder="PMDC number must be exactly 6 digits" required>
+                    </div>
 
-        <!-- Study or Specialization -->
-        <label for="specialization">Study/Specialization:</label>
-        <input type="text" id="specialization" name="specialization" required><br><br>
+                    <div class="input-group">
+                        <label for="specialty">Specialty</label>
+                        <select id="specialty" name="specialty" required>
+                            <option value="">Select Specialty</option>
+                            <option value="MBBS General Physician">MBBS General Physician</option>
+                            <option value="FCPS Consultant">FCPS Consultant</option>
+                            <option value="Allied Health Services Professional">Allied Health Sciences Professional</option>
+                        </select>
+                    </div>
 
-        <!-- FCPS Number -->
-        <label for="fcps-number">FCPS Number:</label>
-        <input type="text" id="fcps-number" name="fcps-number" required><br><br>
+                    <!-- Specialty Sections (Hidden by Default) -->
+                    <div id="fcps-sub-specialty" class="specialty-section" style="display: none;">
+                        <label for="fcps-specialty">FCPS Sub-specialty</label>
+                        <select id="fcps-specialty" name="fcps-specialty">
+                            <option value="">Select Sub-specialty</option>
+                            <optgroup label="Medical Specialties">
+                                <option value="Cardiology">Cardiology</option>
+                                <option value="Gastroenterology">Gastroenterology</option>
+                                <option value="Nephrology">Nephrology</option>
+                                <option value="Endocrinology">Endocrinology</option>
+                                <option value="Pulmonology">Pulmonology</option>
+                                <option value="Neurology">Neurology</option>
+                                <option value="Dermatology">Dermatology</option>
+                                <option value="Rheumatology">Rheumatology</option>
+                                <option value="Hematology">Hematology</option>
+                                <option value="Oncology">Oncology</option>
+                            </optgroup>
+                            <optgroup label="Surgical Specialties">
+                                <option value="General Surgery">General Surgery</option>
+                                <option value="Cardiothoracic Surgery">Cardiothoracic Surgery</option>
+                                <option value="Neurosurgery">Neurosurgery</option>
+                                <option value="Orthopedic Surgery">Orthopedic Surgery</option>
+                                <option value="Plastic Surgery">Plastic Surgery</option>
+                                <option value="Urology">Urology</option>
+                                <option value="Pediatric Surgery">Pediatric Surgery</option>
+                                <option value="Vascular Surgery">Vascular Surgery</option>
+                                <option value="Ophthalmology">Ophthalmology</option>
+                                <option value="ENT Surgery">ENT Surgery</option>
+                            </optgroup>
+                            <optgroup label="Women's Health">
+                                <option value="Obstetrics and Gynecology">Obstetrics and Gynecology</option>
+                            </optgroup>
+                            <optgroup label="Child Health">
+                                <option value="Pediatrics">Pediatrics</option>
+                            </optgroup>
+                            <optgroup label="Mental Health">
+                                <option value="Psychiatry">Psychiatry</option>
+                            </optgroup>
+                            <optgroup label="Diagnostic Specialties">
+                                <option value="Radiology">Radiology</option>
+                                <option value="Pathology">Pathology</option>
+                            </optgroup>
+                        </select>
+                    </div>
 
-        <!-- Experience in Numbers -->
-        <label for="experience">Experience (in years):</label>
-        <input type="number" id="experience" name="experience" required><br><br>
+                    <div id="allied-health-sub-specialty" class="specialty-section" style="display: none;">
+                        <label for="allied-health-specialty">Allied Health Sub-specialty</label>
+                        <select id="allied-health-specialty" name="allied-health-specialty">
+                            <option value="">Select Sub-specialty</option>
+                            <optgroup label="Therapy and Rehabilitation">
+                                <option value="Physiotherapist">Physiotherapist</option>
+                                <option value="Occupational Therapist">Occupational Therapist</option>
+                                <option value="Speech and Language Pathologist">Speech and Language Pathologist</option>
+                                <option value="Rehabilitation Specialist">Rehabilitation Specialist</option>
+                            </optgroup>
+                            <optgroup label="Laboratory Sciences">
+                                <option value="Medical Lab Technologist">Medical Lab Technologist</option>
+                                <option value="Histotechnologist">Histotechnologist</option>
+                                <option value="Microbiologist">Microbiologist</option>
+                                <option value="Cytotechnologist">Cytotechnologist</option>
+                            </optgroup>
+                            <optgroup label="Imaging and Diagnostics">
+                                <option value="Radiographer">Radiographer</option>
+                                <option value="Ultrasound Technician">Ultrasound Technician</option>
+                                <option value="MRI Technologist">MRI Technologist</option>
+                                <option value="Nuclear Medicine Technologist">Nuclear Medicine Technologist</option>
+                            </optgroup>
+                            <optgroup label="Public Health and Nutrition">
+                                <option value="Public Health Specialist">Public Health Specialist</option>
+                                <option value="Nutritionist">Nutritionist</option>
+                                <option value="Dietitian">Dietitian</option>
+                            </optgroup>
+                            <optgroup label="Pharmaceutical Services">
+                                <option value="Pharmacist">Pharmacist</option>
+                                <option value="Pharmacy Technician">Pharmacy Technician</option>
+                            </optgroup>
+                            <optgroup label="Mental and Behavioral Health">
+                                <option value="Clinical Psychologist">Clinical Psychologist</option>
+                                <option value="Counselor">Counselor</option>
+                            </optgroup>
+                            <optgroup label="Emergency and Critical Care">
+                                <option value="Emergency Medical Technician (EMT)">Emergency Medical Technician (EMT)</option>
+                                <option value="Paramedic">Paramedic</option>
+                                <option value="Respiratory Therapist">Respiratory Therapist</option>
+                            </optgroup>
+                            <optgroup label="Other Specialties">
+                                <option value="Optometrist">Optometrist</option>
+                                <option value="Audiologist">Audiologist</option>
+                                <option value="Dental Hygienist">Dental Hygienist</option>
+                            </optgroup>
+                        </select>
+                    </div>
 
-        <!-- Submit Button -->
-        <button type="submit">Submit</button>
-    </form>
+                    <div class="input-group">
+                        <label for="year-of-graduation">Year of Graduation</label>
+                        <input type="number" id="year-of-graduation" name="year-of-graduation" required>
+                    </div>
+                </div>
+
+                <!-- Additional Details -->
+                <div class="form-section">
+                    <h2>Practice Information</h2>
+                    <div class="input-group">
+                        <label for="city">City</label>
+                        <input type="text" id="city" name="city" required>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="fee">Consultation Fee per Day</label>
+                        <input type="number" id="fee" name="fee" required>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="doctor-image">Profile Picture</label>
+                        <input type="file" id="doctor-image" name="doctor-image" accept="image/*" required>
+                    </div>
+                </div>
+            </div>
+
+            <div class="input-group resume-upload">
+                <label for="doctor-resume">Upload Resume (PDF/DOCX)</label>
+                <input type="file" id="doctor-resume" name="doctor-resume" accept=".pdf,.doc,.docx" required>
+            </div>
+
+            <div class="submit-section">
+                <button type="submit" class="btn-submit">Complete Registration</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div class="loading-spinner">
+        <div class="spinner"></div>
+    </div>
 
     <script src="{{ url_for('static', filename='js/doctor_registration.js') }}"></script>
 </body>

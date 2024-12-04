@@ -547,6 +547,8 @@ button[type="submit"]:hover {
     margin-left: 10px;
 }
 
+
+
 /* Responsive styles for tablets */
 @media (max-width: 768px) {
     /* Reduce font sizes in test cards */
