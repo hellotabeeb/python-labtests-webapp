@@ -5,9 +5,15 @@ import logging
 import firebase_admin
 from firebase_admin import firestore
 from . import db
+from firebase_admin import storage
+from werkzeug.utils import secure_filename
+import dropbox
+import os
 
 
 main = Blueprint('main', __name__)
+
+
 
 @main.route('/')
 def index():
@@ -15,7 +21,11 @@ def index():
     logger.info("Index route accessed.")
     return render_template('index.html')
 
-@main.route('/doctor-registration')
+# Initialize Dropbox client
+DROPBOX_ACCESS_TOKEN = os.getenv('DROPBOX_ACCESS_TOKEN')
+dropbox_client = dropbox.Dropbox(DROPBOX_ACCESS_TOKEN)
+
+@main.route('/join')
 def doctor_registration():
     return render_template('doctor_registration.html')
 
@@ -26,15 +36,43 @@ def register_doctor():
         logger = logging.getLogger(__name__)
         logger.info(f"Received doctor registration data: {data}")
 
-        # Save data to Firestore
-        doc_ref = db.collection('newDoctorRegistration').document()
-        doc_ref.set(data)
+        # Handle file uploads
+        doctor_image = request.files['doctor-image']
+        doctor_resume = request.files['doctor-resume']
 
-        return jsonify({"success": True, "message": "Doctor registered successfully."}), 200
+        if doctor_image and doctor_resume:
+            # Secure filenames
+            image_filename = secure_filename(doctor_image.filename)
+            resume_filename = secure_filename(doctor_resume.filename)
+
+            # Create a unique folder for the doctor using their email
+            doctor_folder = f"/doctors/{data['email']}"
+
+            # Upload files to Dropbox
+            image_path = f"{doctor_folder}/{image_filename}"
+            resume_path = f"{doctor_folder}/{resume_filename}"
+
+            dropbox_client.files_upload(doctor_image.read(), image_path)
+            dropbox_client.files_upload(doctor_resume.read(), resume_path)
+
+            # Generate shareable URLs
+            image_link = dropbox_client.sharing_create_shared_link_with_settings(image_path).url
+            resume_link = dropbox_client.sharing_create_shared_link_with_settings(resume_path).url
+
+            # Add URLs to the data dictionary
+            data['profile_picture_url'] = image_link
+            data['resume_url'] = resume_link
+
+            # Save data to Firestore using email as document ID
+            doc_ref = db.collection('newDoctorRegistration').document(data['email'])
+            doc_ref.set(data)
+
+            return jsonify({"success": True, "message": "Doctor registered successfully."}), 200
+        else:
+            return jsonify({"success": False, "message": "File upload failed."}), 400
     except Exception as e:
         logger.error(f"Error registering doctor: {e}")
         return jsonify({"success": False, "message": "Failed to register doctor."}), 500
-    
     
 
 @main.route('/book', methods=['POST'])
