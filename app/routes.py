@@ -88,7 +88,7 @@ def home_sampling():
             # Send email to admin
             try:
                 sender = {"name": "HelloTabeeb", "email": "support@hellotabeeb.com"}  # Replace with your sender email
-                to = [{"email": "ahadnaseer47@gmail.com"}]
+                to = [{"email": "shahzad892@gmail.com"}]
                 
                 html_content = f"""
                 <html>
@@ -117,7 +117,7 @@ def home_sampling():
                 )
                 
                 api_instance.send_transac_email(send_smtp_email)
-                logger.info(f"Email sent successfully to ahadnaseer47@gmail.com.")
+                logger.info(f"Email sent successfully to shahzad892@gmail.com.")
             except ApiException as e:
                 logger.error(f"Brevo API Exception when sending email: {e}")
             except Exception as e:
@@ -213,10 +213,10 @@ def register_doctor():
             doc_ref = db.collection('newDoctorRegistration').document(data['email'])
             doc_ref.set(data)
 
-            # Send email to ahadnaseer47@gmail.com
+           
             try:
                 sender = {"name": "HelloTabeeb", "email": "support@hellotabeeb.com"}  # Replace with your sender email
-                to = [{"email": "ahadnaseer47@gmail.com"}]
+                to = [{"email": "shahzad892@gmail.com"}]
                 
                 html_content = f"""
                 <html>
@@ -254,7 +254,7 @@ def register_doctor():
                 )
                 
                 api_instance.send_transac_email(send_smtp_email)
-                logger.info(f"Email sent successfully to ahadnaseer47@gmail.com.")
+                logger.info(f"Email sent successfully to shahzad892@gmail.com.")
             except ApiException as e:
                 logger.error(f"Brevo API Exception when sending email: {e}")
             except Exception as e:
