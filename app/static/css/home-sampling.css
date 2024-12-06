@@ -38,6 +38,7 @@ header {
 }
 
 .logo img {
+    margin-top: 20px;
     max-width: 200px;
     height: auto;
 }
