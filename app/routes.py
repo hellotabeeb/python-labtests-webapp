@@ -221,12 +221,28 @@ def register_doctor():
                 html_content = f"""
                 <html>
                     <body>
-                        <h2>New Doctor Registration</h2>
-                        <p><strong>Name:</strong> {data['full-name']}</p>
-                        <p><strong>Email:</strong> {data['email']}</p>
-                        <p><strong>Phone Number:</strong> {data['phone-number']}</p>
-                        <p><strong>Timestamp:</strong> {data['timestamp']}</p>
-                    </body>
+                <h2>New Doctor Registration</h2>
+                <h3>Personal Information</h3>
+                <p><strong>Full Name:</strong> {data['full-name']}</p>
+                <p><strong>Email:</strong> {data['email']}</p>
+                <p><strong>Phone Number:</strong> {data['phone-number']}</p>
+                
+                <h3>Professional Details</h3>
+                <p><strong>PMDC Number:</strong> {data.get('pmdc-number', 'N/A')}</p>
+                <p><strong>Specialty:</strong> {data.get('specialty', 'N/A')}</p>
+                <p><strong>Sub-specialty:</strong> {data.get('fcps-specialty') or data.get('allied-health-specialty', 'N/A')}</p>
+                <p><strong>Year of Graduation:</strong> {data.get('year-of-graduation', 'N/A')}</p>
+                
+                <h3>Practice Information</h3>
+                <p><strong>City:</strong> {data.get('city', 'N/A')}</p>
+                <p><strong>Consultation Fee:</strong> Rs. {data.get('fee', 'N/A')}</p>
+                
+                <h3>Uploaded Documents</h3>
+                <p><strong>Profile Picture:</strong> <a href="{data.get('profile_picture_url', '#')}">View Image</a></p>
+                <p><strong>Resume:</strong> <a href="{data.get('resume_url', '#')}">View Resume</a></p>
+                
+                <p><strong>Registration Timestamp:</strong> {data['timestamp']}</p>
+            </body>
                 </html>
                 """
                 
