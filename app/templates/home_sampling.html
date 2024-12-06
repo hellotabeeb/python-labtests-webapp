@@ -1,0 +1,208 @@
+<!-- templates/home_sampling.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HelloTabeeb - Home Sampling</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/home-sampling.css') }}">
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <a href="{{ url_for('main.home_sampling') }}">
+                <img src="static/121.png" alt="logo" class="logo">
+            </a>
+                </div>
+        <div class="startup-headline">
+            <h2>Request Home Sampling for Lab Tests</h2>
+        </div>
+    </header>
+
+    <div class="description-section">
+        <p class="description">
+            Schedule your lab tests from the comfort of your home. Our team will visit you to collect samples at your convenience.
+        </p>
+    </div>
+
+    <form id="home-sampling-form" action="{{ url_for('main.home_sampling') }}" method="POST" enctype="multipart/form-data">
+        <div class="form-grid">
+            <div class="form-section">
+                <h2>Personal Information</h2>
+                <div class="input-group">
+                    <label for="full-name">Full Name</label>
+                    <input type="text" id="full-name" name="full-name" required>
+                </div>
+
+                <div class="input-group">
+                    <label for="phone-number">Phone Number</label>
+                    <input type="tel" id="phone-number" name="phone-number" required>
+                </div>
+
+                <div class="input-group">
+                    <label for="email">Email Address (Optional)</label>
+                    <input type="email" id="email" name="email">
+                </div>
+
+                <div class="input-group">
+                    <label for="address">Address</label>
+                    <textarea id="address" name="address" rows="4" required></textarea>
+                </div>
+
+                <div class="input-group">
+                    <label for="city">City</label>
+                    <select id="city" name="city" required>
+                        <option value="">Select City</option>
+                        <option value="Lahore">Lahore</option>
+                        <option value="Karachi">Karachi</option>
+                        <option value="Islamabad">Islamabad</option>
+                        <option value="Faisalabad">Faisalabad</option>
+                        <option value="Multan">Multan</option>
+                        <option value="" disabled>──────────</option>
+                        <option value="Abbotabad">Abbotabad</option>
+                        <option value="Ahmedpur">Ahmedpur</option>
+                        <option value="Bahawalnagar">Bahawalnagar</option>
+                        <option value="Bahawalpur">Bahawalpur</option>
+                        <option value="Bajaur Agency">Bajaur Agency</option>
+                        <option value="Bhakkar">Bhakkar</option>
+                        <option value="Bhimber">Bhimber</option>
+                        <option value="Burewala">Burewala</option>
+                        <option value="Chakwal">Chakwal</option>
+                        <option value="Charsadda">Charsadda</option>
+                        <option value="Chichawatni">Chichawatni</option>
+                        <option value="Chiniot City">Chiniot City</option>
+                        <option value="Chishtian">Chishtian</option>
+                        <option value="Dadu">Dadu</option>
+                        <option value="Daska">Daska</option>
+                        <option value="Depalpur">Depalpur</option>
+                        <option value="Dera Ghazi Khan">Dera Ghazi Khan</option>
+                        <option value="Dera Ismail Khan">Dera Ismail Khan</option>
+                        <option value="Dharki">Dharki</option>
+                        <option value="Dunyapur">Dunyapur</option>
+                        <option value="Farooqabad">Farooqabad</option>
+                        <option value="Ghotki">Ghotki</option>
+                        <option value="Gojra">Gojra</option>
+                        <option value="Gujjar Khan">Gujjar Khan</option>
+                        <option value="Gujranwala">Gujranwala</option>
+                        <option value="Gujrat">Gujrat</option>
+                        <option value="Hafizabad">Hafizabad</option>
+                        <option value="Haripur Hazara">Haripur Hazara</option>
+                        <option value="Haroonabad">Haroonabad</option>
+                        <option value="Haveli Lakha">Haveli Lakha</option>
+                        <option value="Jacobabad">Jacobabad</option>
+                        <option value="Jaranwala">Jaranwala</option>
+                        <option value="Jehlum">Jehlum</option>
+                        <option value="Jhang">Jhang</option>
+                        <option value="Joharabad">Joharabad</option>
+                        <option value="Kamalia">Kamalia</option>
+                        <option value="Karak">Karak</option>
+                        <option value="Kasur">Kasur</option>
+                        <option value="Khanewal">Khanewal</option>
+                        <option value="Khanpur">Khanpur</option>
+                        <option value="Kharian">Kharian</option>
+                        <option value="Kohat">Kohat</option>
+                        <option value="Kot Addu">Kot Addu</option>
+                        <option value="KPK">KPK</option>
+                        <option value="Larkana">Larkana</option>
+                        <option value="Layyah">Layyah</option>
+                        <option value="Lodhran">Lodhran</option>
+                        <option value="Malakand">Malakand</option>
+                        <option value="Mandi Bahaudin">Mandi Bahaudin</option>
+                        <option value="Mansehra">Mansehra</option>
+                        <option value="Mardan">Mardan</option>
+                        <option value="Mirpur">Mirpur</option>
+                        <option value="Mirpur Mathelo">Mirpur Mathelo</option>
+                        <option value="Muridke">Muridke</option>
+                        <option value="Muzaffargarh">Muzaffargarh</option>
+                        <option value="Muzaffarabad">Muzaffarabad</option>
+                        <option value="Nankana Sahib">Nankana Sahib</option>
+                        <option value="Narrowal">Narrowal</option>
+                        <option value="Nowshera">Nowshera</option>
+                        <option value="Oghi">Oghi</option>
+                        <option value="Okara">Okara</option>
+                        <option value="Okara Cantt">Okara Cantt</option>
+                        <option value="Pakpattan">Pakpattan</option>
+                        <option value="Pano Akil">Pano Akil</option>
+                        <option value="Pasrur">Pasrur</option>
+                        <option value="Pattoki">Pattoki</option>
+                        <option value="Peshawar">Peshawar</option>
+                        <option value="Pir Mahal">Pir Mahal</option>
+                        <option value="Qaidabad">Qaidabad</option>
+                        <option value="Quetta">Quetta</option>
+                        <option value="Rahim Yar Khan">Rahim Yar Khan</option>
+                        <option value="Raiwind">Raiwind</option>
+                        <option value="Rajanpur">Rajanpur</option>
+                        <option value="Rawalkot">Rawalkot</option>
+                        <option value="Rawalpindi">Rawalpindi</option>
+                        <option value="Sadiqabad">Sadiqabad</option>
+                        <option value="Sahiwal">Sahiwal</option>
+                        <option value="Sahiwal & Burewala">Sahiwal & Burewala</option>
+                        <option value="Sambrial">Sambrial</option>
+                        <option value="Sangla Hill">Sangla Hill</option>
+                        <option value="Sargodha">Sargodha</option>
+                        <option value="Shahdakot">Shahdakot</option>
+                        <option value="Shahkot">Shahkot</option>
+                        <option value="Shakar Garh">Shakar Garh</option>
+                        <option value="Sheikupura">Sheikupura</option>
+                        <option value="Sialkot">Sialkot</option>
+                        <option value="Sukkur">Sukkur</option>
+                        <option value="Swabi">Swabi</option>
+                        <option value="Swat">Swat</option>
+                        <option value="Tanlianwala">Tanlianwala</option>
+                        <option value="Timargara">Timargara</option>
+                        <option value="Toba Tek Singh">Toba Tek Singh</option>
+                        <option value="Vehari">Vehari</option>
+                        <option value="Wazirabad">Wazirabad</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h2>Test Information</h2>
+                <div class="input-group">
+                    <label for="test-name">Test Name</label>
+                    <input type="text" id="test-name" name="test-name" required>
+                </div>
+
+                <div class="input-group">
+                    <label for="prescription">Upload Prescription (Max 10MB)</label>
+                    <input type="file" id="prescription" name="prescription" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" required>
+                </div>
+
+                <div class="input-group">
+                    <label for="date-time">Preferred Date and Time</label>
+                    <input type="datetime-local" id="date-time" name="date-time" required>
+                </div>
+
+                <div class="input-group">
+                    <label for="payment-mode">Mode of Payment</label>
+                    <select id="payment-mode" name="payment-mode" required>
+                        <option value="">Select Payment Mode</option>
+                        <option value="Cash">Cash</option>
+                        <option value="Credit Card">Card</option>
+                        <option value="Online Transfer">Online Transfer</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label for="additional-notes">Additional Notes</label>
+                    <textarea id="additional-notes" name="additional-notes" rows="4"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <button type="submit">Submit</button>
+    </form>
+
+    <div id="progress-indicator" class="loading-spinner" style="display: none;">
+        <div class="spinner"></div>
+    </div>
+
+    <div id="success-message" style="display: none;">
+        <p>Your home sampling request has been successfully booked. You'll be contacted soon on your given number.</p>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="{{ url_for('static', filename='js/home_sampling.js') }}"></script>
+</body>
+</html>
