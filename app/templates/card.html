@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hello Tabeeb Card</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <style>
+.cta-btn{
+    width: 140px;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background-color: #f4f7f6;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+
+
+/* CTA Buttons Styles */
+.cta-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin: 30px 0;
+}
+
+.cta-btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.purchase-btn {
+    background-color: #007bff;
+    color: white;
+}
+
+.purchase-btn:hover {
+    background-color: #0056b3;
+}
+
+.validate-btn {
+    background-color: #28a745;
+    color: white;
+}
+
+.validate-btn:hover {
+    background-color: #218838;
+}
+
+/* Card Section Styles */
+.card-section {
+    margin-bottom: 50px;
+}
+
+.card-container {
+    position: relative;
+    width: 600px;
+    margin: 0 auto;
+}
+
+#container {
+    width: 600px;
+    height: 400px;
+    margin: 0 auto;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    perspective: 1000px;
+    background-color: transparent;
+}
+
+.flip-button {
+    position: absolute;
+    bottom: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+.flip-button:hover {
+    background-color: #0056b3;
+    transform: translateX(-50%) scale(1.1);
+}
+
+.flip-button i {
+    font-size: 20px;
+}
+
+/* Form Section Styles */
+.form-section {
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 30px;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.form-group {
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.input-wrapper {
+    display: flex;
+    align-items: center;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.input-icon {
+    padding: 10px;
+    background-color: #f8f9fa;
+    color: #6c757d;
+    border-right: 1px solid #ddd;
+}
+
+input, textarea {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    outline: none;
+    flex-grow: 1;
+}
+
+textarea {
+    resize: vertical;
+}
+
+input:focus, textarea:focus {
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.submit-btn {
+    width: 100%;
+    padding: 12px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+.submit-btn:hover {
+    background-color: #0056b3;
+}
+
+/* FAQ Section Styles */
+.faq-section {
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    padding: 30px;
+    margin-top: 40px;
+}
+
+.faq-item {
+    margin-bottom: 20px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 20px;
+}
+
+.faq-question {
+    font-weight: bold;
+    color: #007bff;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.faq-answer {
+    margin-top: 10px;
+    display: none;
+}
+
+.faq-question i {
+    transition: transform 0.3s ease;
+}
+
+.faq-question.active i {
+    transform: rotate(180deg);
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    .cta-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .cta-btn {
+        width: 80%;
+        justify-content: center;
+    }
+
+    #container {
+        width: 100%;
+        height: 300px;
+    }
+
+    .card-container {
+        width: 100%;
+    }
+
+    .form-section {
+        width: 100%;
+        padding: 20px;
+    }
+}
+
+    </style>
+
+    
+</head>
+<body>
+    <div class="container">
+        <h1>Hello Tabeeb Card</h1>
+        
+        <!-- CTA Buttons -->
+        <div class="cta-buttons">
+       <a href="/validation" class="cta-btn validate-btn" style="text-decoration: none;">
+                <i class="fas fa-check-circle"></i> Validate Card
+            </a>
+        </div>
+
+        <!-- Card Section -->
+        <div class="card-section">
+            <div class="card-container">
+                <div id="container"></div>
+                <button id="flipButton" class="flip-button">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+            </div>
+        </div>
+
+
+                <!-- Add this after the card container and before the form section -->
+        <div class="price-section" style="
+            text-align: center;
+            margin: 40px auto;
+            padding: 20px;
+            max-width: 400px;
+            background: linear-gradient(135deg, #ffffff, #f8f9fa);
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e9ecef;
+        ">
+            <h2 style="
+                color: #2c3e50;
+                margin-bottom: 15px;
+                font-size: 24px;
+            ">Card Price</h2>
+            
+            <div class="price-tag" style="
+                font-size: 36px;
+                color: #007bff;
+                font-weight: bold;
+                margin: 15px 0;
+            ">
+                <span style="
+                    font-size: 20px;
+                    color: #6c757d;
+                ">RS</span>
+                1,000
+            </div>
+            
+            <div class="price-features" style="
+                margin: 20px 0;
+                color: #495057;
+                font-size: 16px;
+            ">
+                
+            </div>
+        </div>
+        
+        <!-- Form Section -->
+        <div class="form-section">
+            <h2>Contact Information</h2>
+            <form id="contactForm">
+                <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-user input-icon"></i>
+                        <input type="text" id="name" name="name" placeholder="Enter your full name" required>
+                    </div>
+                </div>
+
+                                <!-- Add this after the name form-group -->
+                <div class="form-group">
+                    <label for="age">Age</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-calendar-alt input-icon"></i>
+                        <input type="number" id="age" name="age" placeholder="Enter your age" required min="0" max="120">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-envelope input-icon"></i>
+                        <input type="email" id="email" name="email" placeholder="Enter your email" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="phone">Phone Number</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-phone input-icon"></i>
+                        <input type="tel" id="phone" name="phone" placeholder="Enter your phone number" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="message">Additional Message</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-comment input-icon"></i>
+                        <textarea id="message" name="message" placeholder="Any additional information" rows="4"></textarea>
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-btn">
+                    <i class="fas fa-paper-plane"></i> Buy Card
+                </button>
+            </form>
+        </div>
+
+        <!-- FAQ Section -->
+        <div class="faq-section">
+            <h2>Frequently Asked Questions</h2>
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    Why Buy the Hello Tabeeb Card? 
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    The Hello Tabeeb Card is your comprehensive health companion. It provides instant access to medical records, enables quick consultations, and offers personalized health tracking. With this card, you streamline your healthcare experience, reduce paperwork, and have critical medical information at your fingertips.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    How Secure is the Hello Tabeeb Card? 
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    Security is our top priority. The Hello Tabeeb Card uses advanced encryption technologies to protect your personal health information. Each card has a unique digital signature, multi-factor authentication, and is compliant with international healthcare data protection standards, ensuring your medical data remains confidential and secure.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    What Services Are Included with the Card? 
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    The Hello Tabeeb Card offers a comprehensive suite of services including digital health records management, telemedicine consultations, prescription tracking, personalized health recommendations, emergency medical information access, and seamless integration with healthcare providers' networks.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        
+        function toggleFAQ(element) {
+            element.classList.toggle('active');
+            const answer = element.nextElementSibling;
+            answer.style.display = answer.style.display === 'block' ? 'none' : 'block';
+        }
+    </script>
+
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/110/three.min.js"></script>
+        <script>
+            // Three.js card rendering script
+            const container = document.getElementById('container');
+            const scene = new THREE.Scene();
+            scene.background = null;
+            const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer({ alpha: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            container.appendChild(renderer.domElement);
+        
+            const cardWidth = 6;
+            const cardHeight = 4;
+            const cardDepth = 0.01;
+        
+           // First, define materials
+const frontMaterial = new THREE.MeshBasicMaterial();
+const backMaterial = new THREE.MeshBasicMaterial();
+
+// Then load textures
+const textureLoader = new THREE.TextureLoader();
+// Update image paths
+textureLoader.load(
+    "/static/1111.png",  // Front image
+    function(texture) {
+        frontMaterial.map = texture;
+        frontMaterial.needsUpdate = true;
+    },
+    undefined,
+    function(error) {
+        console.error("Error loading front texture:", error);
+    }
+);
+
+textureLoader.load(
+    "/static/111.png",  // Back image
+    function(texture) {
+        backMaterial.map = texture;
+        backMaterial.needsUpdate = true;
+    },
+    undefined,
+    function(error) {
+        console.error("Error loading back texture:", error);
+    }
+);
+
+// Create geometries and meshes
+const frontGeometry = new THREE.PlaneGeometry(cardWidth, cardHeight);
+const backGeometry = new THREE.PlaneGeometry(cardWidth, cardHeight);
+
+const frontMesh = new THREE.Mesh(frontGeometry, frontMaterial);
+const backMesh = new THREE.Mesh(backGeometry, backMaterial);
+        
+            const cardGroup = new THREE.Group();
+            frontMesh.position.z = cardDepth / 2;
+            backMesh.position.z = -cardDepth / 2;
+            backMesh.rotation.y = Math.PI;
+        
+            cardGroup.add(frontMesh, backMesh);
+            scene.add(cardGroup);
+        
+            camera.position.z = 5;
+        
+            let isFlipping = false;
+            let targetRotation = 0;
+            const flipDuration = 1000; // 1 second
+            let flipStartTime = 0;
+            let initialRotation = 0;
+        
+            document.getElementById('flipButton').addEventListener('click', () => {
+                if (!isFlipping) {
+                    isFlipping = true;
+                    flipStartTime = Date.now();
+                    initialRotation = cardGroup.rotation.y;
+                    targetRotation = initialRotation + Math.PI;
+                }
+            });
+        
+            function flipAnimation() {
+                if (isFlipping) {
+                    const elapsed = Date.now() - flipStartTime;
+                    const progress = Math.min(elapsed / flipDuration, 1);
+                    
+                    // Use easeInOutQuad for smooth animation
+                    const easeProgress = progress < 0.5
+                        ? 2 * progress * progress
+                        : -1 + (4 - 2 * progress) * progress;
+                    
+                    cardGroup.rotation.y = initialRotation + (targetRotation - initialRotation) * easeProgress;
+                    
+                    if (progress === 1) {
+                        isFlipping = false;
+                    }
+                }
+            }
+        
+            window.addEventListener('resize', onWindowResize, false);
+        
+            function onWindowResize() {
+                camera.aspect = container.clientWidth / container.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(container.clientWidth, container.clientHeight);
+            }
+        
+            let isMouseControlEnabled = true;
+            
+            container.addEventListener('mousemove', (e) => {
+                if (!isFlipping && isMouseControlEnabled) {
+                    const rect = container.getBoundingClientRect();
+                    const x = ((e.clientX - rect.left) / container.clientWidth) * 2 - 1;
+                    const y = -((e.clientY - rect.top) / container.clientHeight) * 2 + 1;
+                    cardGroup.rotation.y = x * 0.3;
+                    cardGroup.rotation.x = y * 0.3;
+                }
+            });
+        
+            function animate() {
+                requestAnimationFrame(animate);
+                flipAnimation();
+                renderer.render(scene, camera);
+            }
+            animate();
+        
+            document.getElementById('contactForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                console.log('Form submitted');
+            });
+        </script>
+        <script>
+
+           
+
+
+                                // Add this function to check if phone number exists
+                        async function checkPhoneNumberExists(phone) {
+                            try {
+                                const response = await fetch('/validate-card', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                    },
+                                    body: JSON.stringify({ phone: phone })
+                                });
+                                const data = await response.json();
+                                return data.valid; // Returns true if phone number exists
+                            } catch (error) {
+                                console.error('Error checking phone number:', error);
+                                return false;
+                            }
+                        }
+                        
+                        // Update the form submission handler
+                        document.getElementById('contactForm').addEventListener('submit', async function(e) {
+                            e.preventDefault();
+                            
+                            const formData = new FormData(this);
+                            const submitBtn = this.querySelector('.submit-btn');
+                            const originalBtnText = submitBtn.innerHTML;
+                            const phoneNumber = formData.get('phone');
+                            
+                            // Show loading state
+                            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Checking...';
+                            submitBtn.disabled = true;
+                        
+                            try {
+                                // First check if phone number already exists
+                                const exists = await checkPhoneNumberExists(phoneNumber);
+                                
+                                if (exists) {
+                                    alert('This user already exists whith the same number.');
+                                    submitBtn.innerHTML = originalBtnText;
+                                    submitBtn.disabled = false;
+                                    return;
+                                }
+                        
+                                // If phone number doesn't exist, proceed with submission
+                                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+                                
+                                const response = await fetch('/submit-card-purchase', {
+                                    method: 'POST',
+                                    body: formData
+                                });
+                                
+                                const data = await response.json();
+                                
+                                if (data.success) {
+                                    alert('Purchase request successfull, You will be contacted soon on your provided number.');
+                                    this.reset();
+                                    // Redirect after alert
+                                    window.location.href = data.redirect;
+                                } else {
+                                    alert('Error: ' + data.message);
+                                }
+                            } catch (error) {
+                                console.error('Error:', error);
+                                alert('An error occurred while submitting your request. Please try again.');
+                            } finally {
+                                // Restore button state
+                                submitBtn.innerHTML = originalBtnText;
+                                submitBtn.disabled = false;
+                            }
+                        });
+        </script>
+</body>
+</html>
