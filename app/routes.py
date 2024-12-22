@@ -45,19 +45,89 @@ def submit_card_purchase():
         phone = request.form.get('phone')
         age = request.form.get('age')
         message = request.form.get('message', '')
+        payment_proof = request.files.get('payment-proof')
         timestamp = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
 
-        # Save to Firestore
-        db = firestore.client()
-        doc_ref = db.collection('cardPurchase').document()
-        doc_ref.set({
-            'name': name,
-            'email': email,
-            'phone': phone,
-            'age': age,
-            'message': message,
-            'timestamp': firestore.SERVER_TIMESTAMP
-        })
+        # Validate required fields
+        if not all([name, email, phone, age, payment_proof]):
+            return jsonify({
+                'success': False,
+                'message': 'Please fill in all required fields'
+            }), 400
+
+        # Validate file size and type
+        if payment_proof:
+            # Check file size (10MB limit)
+            payment_proof.seek(0, 2)  # Seek to end of file
+            size = payment_proof.tell()
+            payment_proof.seek(0)  # Reset file pointer
+            
+            if size > 10 * 1024 * 1024:
+                return jsonify({
+                    'success': False,
+                    'message': 'Payment proof file size must be less than 10MB'
+                }), 400
+
+            # Check file type
+            allowed_types = {'image/jpeg', 'image/png', 'image/jpg', 'application/pdf'}
+            if payment_proof.content_type not in allowed_types:
+                return jsonify({
+                    'success': False,
+                    'message': 'Please upload an image file (JPEG, PNG) or PDF'
+                }), 400
+
+        # Upload payment proof to Google Drive
+        try:
+            file_name = secure_filename(f"{name}_{timestamp}_{payment_proof.filename}")
+            
+            # Create 'card_purchases' folder if it doesn't exist
+            folder_name = 'card_purchases'
+            query = f"name='{folder_name}' and mimeType='application/vnd.google-apps.folder' and trashed=false"
+            results = drive_service.files().list(q=query, fields="files(id)").execute()
+            folders = results.get('files', [])
+            
+            if not folders:
+                folder_metadata = {
+                    'name': folder_name,
+                    'mimeType': 'application/vnd.google-apps.folder'
+                }
+                folder = drive_service.files().create(body=folder_metadata, fields='id').execute()
+                folder_id = folder.get('id')
+            else:
+                folder_id = folders[0]['id']
+
+            # Upload file
+            file_metadata = {
+                'name': file_name,
+                'parents': [folder_id]
+            }
+            
+            media = MediaIoBaseUpload(
+                payment_proof,
+                mimetype=payment_proof.content_type,
+                resumable=True
+            )
+            
+            file = drive_service.files().create(
+                body=file_metadata,
+                media_body=media,
+                fields='id,webViewLink'
+            ).execute()
+
+            # Make file publicly accessible
+            drive_service.permissions().create(
+                fileId=file['id'],
+                body={'type': 'anyone', 'role': 'reader'}
+            ).execute()
+
+            payment_proof_url = file.get('webViewLink', '')
+
+        except Exception as upload_error:
+            logging.error(f"Error uploading payment proof: {str(upload_error)}")
+            return jsonify({
+                'success': False,
+                'message': 'Failed to upload payment proof. Please try again.'
+            }), 500
 
         # Send email to admin
         try:
@@ -72,13 +142,14 @@ def submit_card_purchase():
                     <p><strong>Phone Number:</strong> {phone}</p>
                     <p><strong>Age:</strong> {age}</p>
                     <p><strong>Message:</strong> {message}</p>
+                    <p><strong>Payment Proof:</strong> <a href="{payment_proof_url}">View Payment Proof</a></p>
                     <p><strong>Purchase Timestamp:</strong> {timestamp}</p>
                 </body>
             </html>
             """
 
             admin_email = SendSmtpEmail(
-                to=[{"email": "shahzad892@gmail.com"}],
+                to=[{"email": "ahadnaseer47@gmail.com"}],
                 sender=sender,
                 subject="New Card Purchase - HelloTabeeb",
                 html_content=admin_html_content
@@ -93,7 +164,7 @@ def submit_card_purchase():
 
         return jsonify({
             'success': True,
-            'message': 'Purchase submitted successfully, You will be contacted soon on your provided number.',
+            'message': 'Purchase submitted successfully. You will be contacted soon on your provided number.',
             'redirect': '/card'
         })
 
@@ -101,9 +172,10 @@ def submit_card_purchase():
         logging.getLogger(__name__).error(f"Error saving card purchase: {str(e)}")
         return jsonify({
             'success': False, 
-            'message': str(e)
+            'message': 'An unexpected error occurred. Please try again.'
         }), 500
-
+    
+    
 @main.route('/validate-card', methods=['POST'])
 def validate_card():
     try:
@@ -203,7 +275,7 @@ def home_sampling():
             # Send email to admin
             try:
                 sender = {"name": "HelloTabeeb", "email": "support@hellotabeeb.com"}  # Replace with your sender email
-                to = [{"email": "shahzad892@gmail.com"}]
+                to = [{"email": "ahadnaseer47@gmail.com"}]
                 
                 html_content = f"""
                 <html>
@@ -344,7 +416,7 @@ def register_doctor():
                 """
 
                 admin_email = SendSmtpEmail(
-                    to=[{"email": "shahzad892@gmail.com"}],
+                    to=[{"email": "ahadnaseer47@gmail.com"}],
                     sender=sender,
                     subject="New Doctor Registration",
                     html_content=admin_html_content
@@ -435,32 +507,22 @@ def book():
             logger.warning("Form submission without selecting any tests.")
             return redirect(url_for('main.index'))
         
+        db = firestore.client()
+        
         # Logic for different labs
         if lab == 'chughtai-lab':
-            # Existing Chughtai Lab logic
             code, tests_details = move_code_to_availed(name, phone, email, selected_tests)
-            
             if not code:
-                flash('Sorry, no booking codes are available at the moment. Please try again later.', 'error')
-                logger.error("Failed to assign a booking code.")
+                flash('No available booking codes found.', 'error')
                 return redirect(url_for('main.index'))
-            
-            # Send confirmation email
-            send_email(email, name, tests_details, code)
-            
+            send_email(email, name, tests_details, code, "Chughtai Lab")
             flash('Booking successful! A confirmation email has been sent.', 'success')
             logger.info(f"Chughtai Lab booking successful for user {email} with code {code}.")
         
         elif lab == 'idc-islamabad':
-            # New IDC Lab logic
-            # Use 'IDC' as the default code for IDC lab
             code = 'IDC'
-            
-            # Fetch test details for selected IDC tests
-            db = firestore.client()
             tests_ref = db.collection('labs/IDC/tests')
             tests_details = []
-            
             for test_id in selected_tests:
                 test_doc = tests_ref.document(test_id).get()
                 if test_doc.exists:
@@ -468,17 +530,81 @@ def book():
                     tests_details.append({
                         'name': test_data.get('Name', 'N/A'),
                         'original_fee': f"Rs.{test_data.get('Fees', '0.00')}",
-                        'discounted_fee': f"Rs.{float(test_data.get('Fees', '0.00')) * 0.9:.2f}"  # 10% discount
+                        'discounted_fee': f"Rs.{float(test_data.get('Fees', '0.00')) * 0.9:.2f}"
                     })
-                    logger.info(f"Fetched IDC test: {test_data.get('Name', 'N/A')}")
-                else:
-                    logger.warning(f"IDC Test ID {test_id} not found.")
-            
-            # Send IDC specific email
-            send_email(email, name, tests_details, code)
-            
+            current_month = datetime.utcnow().strftime('%m-%Y')
+            availed_code_data = {
+                'name': name,
+                'phone': phone,
+                'email': email,
+                'lab': lab,
+                'code': code,
+                'tests': tests_details,
+                'timestamp': datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
+            }
+            db.collection('availedCodes').document(current_month).collection('details').add(availed_code_data)
+            logger.info(f"IDC booking data saved in availed codes collection for user {email}.")
+            send_email(email, name, tests_details, code, "IDC Islamabad")
             flash('IDC Lab booking successful! A confirmation email has been sent.', 'success')
             logger.info(f"IDC Lab booking successful for user {email}.")
+        
+        elif lab == 'dr-essa-lab':
+            code = 'hellotabib'
+            tests_ref = db.collection('labs/essa/tests')
+            tests_details = []
+            for test_id in selected_tests:
+                test_doc = tests_ref.document(test_id).get()
+                if test_doc.exists:
+                    test_data = test_doc.to_dict()
+                    tests_details.append({
+                        'name': test_data.get('Name', 'N/A'),
+                        'original_fee': f"Rs.{test_data.get('Fees', '0.00')}",
+                        'discounted_fee': f"Rs.{float(test_data.get('Fees', '0.00')) * 0.8:.2f}"
+                    })
+            current_month = datetime.utcnow().strftime('%m-%Y')
+            availed_code_data = {
+                'name': name,
+                'phone': phone,
+                'email': email,
+                'lab': lab,
+                'code': code,
+                'tests': tests_details,
+                'timestamp': datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
+            }
+            db.collection('availedCodes').document(current_month).collection('details').add(availed_code_data)
+            logger.info(f"Essa Lab booking data saved in availed codes collection for user {email}.")
+            send_email(email, name, tests_details, code, "Dr. Essa Lab")
+            flash('Essa Lab booking successful! A confirmation email has been sent.', 'success')
+            logger.info(f"Essa Lab booking successful for user {email}.")
+        
+        elif lab == 'another-lab':
+            code = 'HTB'
+            tests_ref = db.collection('labs/excel/tests')
+            tests_details = []
+            for test_id in selected_tests:
+                test_doc = tests_ref.document(test_id).get()
+                if test_doc.exists:
+                    test_data = test_doc.to_dict()
+                    tests_details.append({
+                        'name': test_data.get('Name', 'N/A'),
+                        'original_fee': f"Rs.{test_data.get('Fees', '0.00')}",
+                        'discounted_fee': f"Rs.{float(test_data.get('Fees', '0.00')) * 0.85:.2f}"
+                    })
+            current_month = datetime.utcnow().strftime('%m-%Y')
+            availed_code_data = {
+                'name': name,
+                'phone': phone,
+                'email': email,
+                'lab': lab,
+                'code': code,
+                'tests': tests_details,
+                'timestamp': datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
+            }
+            db.collection('availedCodes').document(current_month).collection('details').add(availed_code_data)
+            logger.info(f"Excel Lab booking data saved in availed codes collection for user {email}.")
+            send_email(email, name, tests_details, code, "Excel Lab")
+            flash('Excel Lab booking successful! A confirmation email has been sent.', 'success')
+            logger.info(f"Excel Lab booking successful for user {email}.")
         
         else:
             flash('Invalid lab selection.', 'error')
@@ -492,42 +618,42 @@ def book():
         logger.error(f"Unexpected error during booking: {e}")
         return redirect(url_for('main.index'))
 
-
 @main.route('/tests', methods=['GET'])
 def get_tests():
     logger = logging.getLogger(__name__)
     try:
-        # Attempt to get the Firestore client, initializing if necessary
+        # Attempt to get the Firestore client
         try:
             db = firestore.client()
         except Exception as init_error:
-            logger.error(f"Failed to get Firestore client: {init_error}")
-            return jsonify({"error": "Database initialization failed"}), 500
+            logger.error(f"Error initializing Firestore: {init_error}")
+            return jsonify([])
 
-        # Rest of the existing function remains the same...
-        lab = request.args.get('lab', 'chughtai-lab')
-        
+        # Map each lab to its Firestore subcollection path
         lab_collection_map = {
             'chughtai-lab': 'labs/chughtaiLab/tests',
-            'idc-islamabad': 'labs/IDC/tests'
+            'idc-islamabad': 'labs/IDC/tests',
+            'dr-essa-lab': 'labs/essa/tests',     # Added Dr. Essa Lab
+            'another-lab': 'labs/excel/tests'     # Added Excel Lab
         }
-        
+
+        lab = request.args.get('lab', 'chughtai-lab')
         if lab not in lab_collection_map:
-            logger.warning(f"Invalid lab selection: {lab}")
-            return jsonify({"error": "Invalid lab selection"}), 400
-        
+            logger.warning(f"Lab '{lab}' not recognized.")
+            return jsonify([])
+
         collection_path = lab_collection_map[lab]
         logger.info(f"Fetching tests from collection path: {collection_path}")
         tests_ref = db.collection(collection_path)
+        
         tests = []
         for doc in tests_ref.stream():
-            test = doc.to_dict()
-            test['id'] = doc.id  # Include document ID
-            tests.append(test)
-            logger.info(f"Fetched test: {test}")
+            data = doc.to_dict()
+            data['id'] = doc.id
+            tests.append(data)
         
         logger.info(f"Fetched {len(tests)} tests successfully for lab: {lab}.")
         return jsonify(tests)
     except Exception as e:
-        logger.error(f"Error fetching tests for lab {lab}: {e}")
-        return jsonify({"error": "Failed to fetch tests."}), 500
+        logger.error(f"Error fetching tests: {e}")
+        return jsonify([])
