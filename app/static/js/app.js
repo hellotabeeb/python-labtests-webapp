@@ -29,21 +29,29 @@ document.addEventListener('DOMContentLoaded', function() {
             ],
             highDiscountPercentage: 30,
             testsToPlaceLast: [
-                "CT Scanogram CompCt brain +orbit without contrast",
-                "CT Scanogram Complete Lower Limb",
-                "Cryoglobulin (TDL)",
-                "Fluid for cell count and Differential ( Fluid Name: Peritoneal Fluid )",
-                "Reducing Substances (Urine)"
+                "CT Scanogram CompCt brain +orbit without contrast"
             ]
         },
         'idc-islamabad': {
             defaultDiscount: 10,
-            highDiscountTests: [], // No specific high-discount tests
+            highDiscountTests: [],
             highDiscountPercentage: 10,
+            testsToPlaceLast: []
+        },
+        'dr-essa-lab': {
+            defaultDiscount: 20,
+            highDiscountTests: [],
+            highDiscountPercentage: 20,
+            testsToPlaceLast: []
+        },
+        'another-lab': {
+            defaultDiscount: 15,
+            highDiscountTests: [],
+            highDiscountPercentage: 15,
             testsToPlaceLast: []
         }
     };
-    
+
     // Function to show the loading spinner
     function showLoading() {
         loadingSpinner.classList.add('visible');
@@ -336,7 +344,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Function to handle lab selection
     function handleLabSelection(selectedLab) {
         // Reset selected tests and total amount
         selectedTests.clear();
@@ -344,7 +351,7 @@ document.addEventListener('DOMContentLoaded', function() {
         selectedTestsList.innerHTML = '';
         updateTotalFee();
         
-        if (selectedLab === 'chughtai-lab' || selectedLab === 'idc-islamabad') {
+        if (selectedLab === 'chughtai-lab' || selectedLab === 'idc-islamabad' || selectedLab === 'dr-essa-lab' || selectedLab === 'another-lab') {
             testSelectionContainer.style.display = 'block';
             comingSoonMessage.style.display = 'none';
             

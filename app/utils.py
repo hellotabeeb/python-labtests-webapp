@@ -5,6 +5,7 @@ from datetime import datetime
 from brevo_python import Configuration, ApiClient, TransactionalEmailsApi, SendSmtpEmail
 from brevo_python.rest import ApiException
 from dotenv import load_dotenv
+from datetime import datetime
 from . import db  # Import db from __init__.py
 
 # Load environment variables from .env file
@@ -45,10 +46,6 @@ def fetch_tests():
         return []
 
 def move_code_to_availed(name, phone, email, selected_tests):
-    """
-    Assigns an available booking code to the user, deletes it from 'codes',
-    and moves details to 'availedCodes'.
-    """
     try:
         logger.info(f"Assigning booking code for user: {email}")
 
@@ -74,8 +71,12 @@ def move_code_to_availed(name, phone, email, selected_tests):
         codes_ref.document(code_doc.id).delete()
         logger.info(f"Deleted code {code} from 'codes' collection.")
 
-        # Define discount percentage
-        DISCOUNT_PERCENTAGE = 10  # 10% discount
+        # Define discount percentage based on lab
+        DISCOUNT_PERCENTAGE = 10  # Default discount
+        if 'essaLab' in selected_tests:
+            DISCOUNT_PERCENTAGE = 20
+        elif 'excelLab' in selected_tests:
+            DISCOUNT_PERCENTAGE = 15
 
         # Fetch selected test details
         tests_details = []
@@ -95,8 +96,11 @@ def move_code_to_availed(name, phone, email, selected_tests):
             else:
                 logger.warning(f"Test ID {test_id} not found.")
 
-        # Add to top-level 'availedCodes' collection
-        availed_ref = db.collection('availedCodes')
+        # Get the current month and year
+        current_month = datetime.utcnow().strftime('%m-%Y')
+
+        # Add to 'availedCodes' collection under the current month
+        availed_ref = db.collection('availedCodes').document(current_month).collection('details')
         availed_ref.add({
             'availableAt': datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'),
             'code': code,
@@ -107,19 +111,17 @@ def move_code_to_availed(name, phone, email, selected_tests):
             'userName': name,
             'userPhone': phone
         })
-        logger.info(f"Moved code {code} to 'availedCodes' for user {email}.")
+        logger.info(f"Moved code {code} to 'availedCodes/{current_month}/details' for user {email}.")
 
         return code, tests_details
     except Exception as e:
         logger.error(f"Error in move_code_to_availed: {e}")
         return None, []
 
-def generate_email_template(name, tests_details, discount_code):
+def generate_email_template(name, tests_details, discount_code, lab_name):
     """
     Generates the HTML email content using the provided template.
     """
-    special_tests = ["Lipid Profile", "Serum 25-OH Vitamin D", "Glycosylated Hemoglobin (HbA1c)"]
-    
     tests_html = ''.join([
         f"""
         <li>
@@ -132,8 +134,10 @@ def generate_email_template(name, tests_details, discount_code):
     ])
 
     # Add specific handling for IDC code
-    code_section = f"<p>Your code: {discount_code}" if discount_code != 'IDC' else "<p>Your lab test is booked with IDC Islamabad</p>"
-
+    if discount_code == 'IDC':
+        code_section = "<p>Your lab test is booked with IDC Islamabad</p>"
+    else:
+        code_section = f"<p>Your code: {discount_code}</p>"
 
     return f"""
         <html>
@@ -150,6 +154,7 @@ def generate_email_template(name, tests_details, discount_code):
                     </div>
                     {code_section}
                     <p>Your discount code: {discount_code}</p>
+                    <p>Your lab test is booked with {lab_name}</p>
                     
                     <!-- Book Again Button -->
                     <div style="text-align: center; margin: 30px 0;">
@@ -193,7 +198,7 @@ def calculate_discounted_fee(test):
     return f"Rs.{discounted_fee:.2f}"
 
 
-def send_email(email, name, tests_details, code):
+def send_email(email, name, tests_details, code, lab_name):
     """
     Sends an email with the booking code and test details to the user using Brevo's transactional email API.
     """
@@ -203,7 +208,7 @@ def send_email(email, name, tests_details, code):
         sender = {"name": "HelloTabeeb", "email": "support@hellotabeeb.com"}  # Replace with your sender email
         to = [{"email": email}]
         
-        html_content = generate_email_template(name, tests_details, code)
+        html_content = generate_email_template(name, tests_details, code, lab_name)
         
         send_smtp_email = SendSmtpEmail(
             to=to,
