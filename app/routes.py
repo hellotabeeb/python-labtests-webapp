@@ -149,7 +149,7 @@ def submit_card_purchase():
             """
 
             admin_email = SendSmtpEmail(
-                to=[{"email": "ahadnaseer47@gmail.com"}],
+                to=[{"email": "shahzad892@gmail.com"}],
                 sender=sender,
                 subject="New Card Purchase - HelloTabeeb",
                 html_content=admin_html_content
@@ -275,7 +275,7 @@ def home_sampling():
             # Send email to admin
             try:
                 sender = {"name": "HelloTabeeb", "email": "support@hellotabeeb.com"}  # Replace with your sender email
-                to = [{"email": "ahadnaseer47@gmail.com"}]
+                to = [{"email": "shahzad892@gmail.com"}]
                 
                 html_content = f"""
                 <html>
@@ -416,7 +416,7 @@ def register_doctor():
                 """
 
                 admin_email = SendSmtpEmail(
-                    to=[{"email": "ahadnaseer47@gmail.com"}],
+                    to=[{"email": "shahzad892@gmail.com"}],
                     sender=sender,
                     subject="New Doctor Registration",
                     html_content=admin_html_content

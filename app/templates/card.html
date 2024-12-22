@@ -3,8 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
     <title>Hello Tabeeb Card</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/card.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
 .cta-btn{
@@ -26,7 +28,15 @@ body {
     padding: 20px;
 }
 
-
+/* Add this CSS to your stylesheet */
+.flip-icon {
+    font-size: 24px;
+    cursor: pointer;
+    color: #007bff;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
 
 /* CTA Buttons Styles */
 .cta-buttons {
@@ -196,6 +206,33 @@ input:focus, textarea:focus {
     padding-bottom: 20px;
 }
 
+.loading-spinner {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.8);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+}
+
+.spinner {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #007bff;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
 .faq-question {
     font-weight: bold;
     color: #007bff;
@@ -240,8 +277,11 @@ input:focus, textarea:focus {
     }
 
     .form-section {
-        width: 100%;
+        width: 90%;
         padding: 20px;
+    }
+    h7{
+        font-size: 12px;
     }
 }
 
@@ -251,7 +291,22 @@ input:focus, textarea:focus {
 </head>
 <body>
     <div class="container">
-        <h1>Hello Tabeeb Card</h1>
+                <header class="header">
+            <div class="logo-container">
+                <a href="{{ url_for('main.card') }}">
+                    <img src="static/121.png" alt="logo" class="logo" style="display: block; margin: 0 auto; max-width: 200px;">
+                </a>
+            </div>
+            <div class="startup-headline">
+                <h2 style="color: #007bff; font-size: 24px; font-weight: 700; text-align: center; margin: 20px 0;">
+                    HelloTabeeb Discount Card
+                </h2>
+                <p style="color: #6c757d; font-size: 16px; text-align: center; max-width: 800px; margin: 0 auto;">
+                    Get exclusive discounts on Lab and Radiology services at Chughtai Lab, 
+                    Islamabad Diagnostic Center, Essa Lab, and Excel Lab.
+                </p>
+            </div>
+        </header>
         
         <!-- CTA Buttons -->
         <div class="cta-buttons">
@@ -272,46 +327,44 @@ input:focus, textarea:focus {
 
 
                 <!-- Add this after the card container and before the form section -->
-        <div class="price-section" style="
-            text-align: center;
-            margin: 40px auto;
-            padding: 20px;
-            max-width: 400px;
-            background: linear-gradient(135deg, #ffffff, #f8f9fa);
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            border: 1px solid #e9ecef;
-        ">
-            <h2 style="
-                color: #2c3e50;
-                margin-bottom: 15px;
-                font-size: 24px;
-            ">Card Price</h2>
-            
-            <div class="price-tag" style="
-                font-size: 36px;
-                color: #007bff;
-                font-weight: bold;
-                margin: 15px 0;
-            ">
-                <span style="
-                    font-size: 20px;
-                    color: #6c757d;
-                ">RS</span>
-                1,000
-            </div>
-            
-            <div class="price-features" style="
-                margin: 20px 0;
-                color: #495057;
-                font-size: 16px;
-            ">
-                
-            </div>
-        </div>
-        
+        <!-- Price Section -->
+<div class="price-section" style="
+text-align: center;
+margin: 40px auto;
+padding: 20px;
+max-width: 600px;
+background: linear-gradient(135deg, #ffffff, #f8f9fa);
+border-radius: 15px;
+box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+border: 1px solid #e9ecef;
+">
+<h2 style="color: #2c3e50; margin-bottom: 15px; font-size: 24px;">Card Price</h2>
+
+<div class="price-tag" style="font-size: 36px; color: #007bff; font-weight: bold; margin: 15px 0;">
+    <span style="font-size: 20px; color: #6c757d;">RS</span>
+    1,000
+</div>
+
+<div class="payment-details" style="margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 10px;">
+    <h3 style="color: #2c3e50; font-size: 18px; margin-bottom: 15px;">Payment Methods</h3>
+    
+    <div class="bank-details" style="text-align: left; margin-bottom: 15px;">
+        <p style="font-weight: bold; color: #007bff;">Allied Bank</p>
+        <p>Title: Be The Health SMC Pvt LTD</p>
+        <p>Account: 0765-0010084877530015</p>
+    </div>
+
+    <div class="jazzcash-details" style="text-align: left;">
+        <p style="font-weight: bold; color: #007bff;">JazzCash</p>
+        <p>Number: 0322-4743390</p>
+    </div>
+</div>
+</div>
+
+
         <!-- Form Section -->
         <div class="form-section">
+            <h7 style="text-align: center; color: red;">To buy card it is important to make a payment on above methods.</h7>
             <h2>Contact Information</h2>
             <form id="contactForm">
                 <div class="form-group">
@@ -329,6 +382,15 @@ input:focus, textarea:focus {
                         <i class="fas fa-calendar-alt input-icon"></i>
                         <input type="number" id="age" name="age" placeholder="Enter your age" required min="0" max="120">
                     </div>
+                </div>
+
+                                <div class="form-group">
+                    <label for="payment-proof">Payment Proof</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-receipt input-icon"></i>
+                        <input type="file" id="payment-proof" name="payment-proof" accept="image/*" required>
+                    </div>
+                    <small>Please attach a screenshot or photo of your payment receipt</small>
                 </div>
                 
                 <div class="form-group">
@@ -359,6 +421,10 @@ input:focus, textarea:focus {
                     <i class="fas fa-paper-plane"></i> Buy Card
                 </button>
             </form>
+        </div>
+                <!-- Add this right after your form closing tag -->
+        <div class="loading-spinner" style="display: none;">
+            <div class="spinner"></div>
         </div>
 
         <!-- FAQ Section -->
