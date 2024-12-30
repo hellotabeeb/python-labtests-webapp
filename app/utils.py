@@ -118,9 +118,10 @@ def move_code_to_availed(name, phone, email, selected_tests):
         logger.error(f"Error in move_code_to_availed: {e}")
         return None, []
 
-def generate_email_template(name, tests_details, discount_code, lab_name):
+def generate_email_template(name, tests_details, discount_code, lab_name, is_twelve_percent=False):
     """
     Generates the HTML email content using the provided template.
+    Includes special 12% discount offer messaging when applicable.
     """
     tests_html = ''.join([
         f"""
@@ -138,6 +139,90 @@ def generate_email_template(name, tests_details, discount_code, lab_name):
         code_section = "<p>Your lab test is booked with IDC Islamabad</p>"
     else:
         code_section = f"<p>Your code: {discount_code}</p>"
+    
+    # Enhanced special offer section for 12% discount customers
+    special_offer_section = ""
+    if is_twelve_percent:
+        special_offer_section = """
+        <div style="background: linear-gradient(135deg, #f6d365 0%, #fda085 100%); 
+                    padding: 25px; 
+                    border-radius: 15px; 
+                    margin: 30px 0; 
+                    box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+            <div style="background: rgba(255,255,255,0.95);
+                        padding: 20px;
+                        border-radius: 10px;
+                        border: 2px dashed #ff6b6b;">
+                
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <h3 style="color: #ff6b6b; 
+                               font-size: 24px; 
+                               margin: 0;
+                               text-transform: uppercase;
+                               letter-spacing: 1px;">
+                        🎉 Exclusive VIP Offer 🎉
+                    </h3>
+                </div>
+
+                <div style="color: #2d3436; line-height: 1.6;">
+                    <p style="font-size: 16px; margin: 10px 0;">
+                        Congratulations! As our valued 12% discount customer, you've unlocked these premium benefits:
+                    </p>
+                    
+                    <ul style="list-style: none; 
+                               padding: 0; 
+                               margin: 20px 0;">
+                        <li style="margin: 12px 0;
+                                   padding: 10px 15px;
+                                   background: #fff;
+                                   border-radius: 8px;
+                                   border-left: 4px solid #ff6b6b;
+                                   box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                            ✨ <strong>Additional Lab Test Discounts</strong>
+                        </li>
+                        <li style="margin: 12px 0;
+                                   padding: 10px 15px;
+                                   background: #fff;
+                                   border-radius: 8px;
+                                   border-left: 4px solid #ff6b6b;
+                                   box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                            🎯 <strong>1 FREE Medical Consultation</strong> (Worth Rs. 1000)
+                        </li>
+                    </ul>
+
+                    <div style="background: #2d3436;
+                               color: white;
+                               padding: 15px;
+                               border-radius: 8px;
+                               text-align: center;
+                               margin: 25px 0 15px 0;">
+                        <p style="font-weight: bold; 
+                                  font-size: 18px; 
+                                  margin: 0 0 10px 0;">
+                            To Claim Your VIP Benefits:
+                        </p>
+                        <p style="font-size: 20px; 
+                                  margin: 0;
+                                  color: #ffd32a;">
+                            Call or WhatsApp: <strong>+92 335 1626806</strong>
+                        </p>
+                        <p style="font-size: 14px;
+                                  color: #dfe6e9;
+                                  margin: 10px 0 0 0;">
+                            Use code: "<strong>avail12%</strong>" when contacting us
+                        </p>
+                    </div>
+                    
+                    <p style="text-align: center;
+                              font-size: 14px;
+                              color: #636e72;
+                              margin: 15px 0 0 0;">
+                        * Offer valid for limited time only. Terms and conditions apply.
+                    </p>
+                </div>
+            </div>
+        </div>
+        """
 
     return f"""
         <html>
@@ -155,6 +240,8 @@ def generate_email_template(name, tests_details, discount_code, lab_name):
                     {code_section}
                     <p>Your discount code: {discount_code}</p>
                     <p>Your lab test is booked with {lab_name}</p>
+                    
+                    {special_offer_section}
                     
                     <!-- Book Again Button -->
                     <div style="text-align: center; margin: 30px 0;">
@@ -198,17 +285,18 @@ def calculate_discounted_fee(test):
     return f"Rs.{discounted_fee:.2f}"
 
 
-def send_email(email, name, tests_details, code, lab_name):
+def send_email(email, name, tests_details, code, lab_name, is_twelve_percent=False):
     """
     Sends an email with the booking code and test details to the user using Brevo's transactional email API.
+    Now includes support for 12% discount special offers.
     """
     try:
         logger.info(f"Preparing to send email to {email} with code {code}.")
 
-        sender = {"name": "HelloTabeeb", "email": "support@hellotabeeb.com"}  # Replace with your sender email
+        sender = {"name": "HelloTabeeb", "email": "support@hellotabeeb.com"}
         to = [{"email": email}]
         
-        html_content = generate_email_template(name, tests_details, code, lab_name)
+        html_content = generate_email_template(name, tests_details, code, lab_name, is_twelve_percent)
         
         send_smtp_email = SendSmtpEmail(
             to=to,

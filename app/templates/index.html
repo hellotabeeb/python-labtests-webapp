@@ -29,6 +29,10 @@
     <!-- Booking Form -->
     <form id="lab-test-form" action="{{ url_for('main.book') }}" method="POST">
         <!-- Patient Name -->
+
+        <input type="hidden" id="discount-type" name="discount-type" value="">
+
+
         <label for="patient-name">Patient Name:</label>
         <input type="text" id="patient-name" name="patient-name" required><br><br>
 
@@ -84,6 +88,24 @@
                 <div class="filter-buttons">
                     <button type="button" class="filter-button" data-discount="20">20%</button>
                     <button type="button" class="filter-button" data-discount="30">30%</button>
+                    <button type="button" class="filter-button" data-discount="12">
+                        12% (extra deals) <span class="info-icon">i</span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Popup Modal -->
+            <div id="info-popup" class="info-popup">
+                <div class="popup-content">
+                    <span class="close-popup">&times;</span>
+                    <div class="celebration-container">
+                        <div class="celebration-animation">🎉✨🎊</div>
+                    </div>
+                    <div class="popup-message" style="border-radius: 10px; font-family: Verdana, Geneva, Tahoma, sans-serif; line-break: auto;">
+                        <h3>Special Offer Alert! 🎯</h3>
+                        <p>Get an exclusive 12% discount on all tests!</p>
+                        <p>By availing it you'll be able to unclock more Lab Discounts + 1 Free Consultation.</p>
+                    </div>
                 </div>
             </div>
 
