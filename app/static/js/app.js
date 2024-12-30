@@ -12,11 +12,40 @@ document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('lab-test-form');
     const loadingSpinner = document.getElementById('loading-spinner');
     const filterButtons = document.querySelectorAll('.filter-button');
+    const infoIcon = document.querySelector('.info-icon');
+    const infoPopup = document.getElementById('info-popup');
+    const closePopup = document.querySelector('.close-popup');
+
     
     let tests = [];  // Store all tests from Firebase
     let selectedTests = new Set();  // Store selected test IDs
     let totalAmount = 0;
     let selectedDiscounts = new Set(); // To store selected discount filters
+
+
+    // Add this to your filter button click handlers
+document.querySelectorAll('.filter-button').forEach(button => {
+    button.addEventListener('click', function() {
+        const discountValue = this.dataset.discount;
+        document.getElementById('discount-type').value = discountValue;
+    });
+});
+
+
+
+
+    infoIcon.addEventListener('click', () => {
+        infoPopup.style.display = 'block';
+    });
+
+    closePopup.addEventListener('click', () => {
+        infoPopup.style.display = 'none';
+    });
+    window.addEventListener('click', (e) => {
+        if (e.target === infoPopup) {
+            infoPopup.style.display = 'none';
+        }
+    });
     
     // Lab-specific discount configurations
     const labDiscountConfigs = {
@@ -28,6 +57,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 "Glycosylated Hemoglobin (HbA1c)"
             ],
             highDiscountPercentage: 30,
+            specialDiscount: 12,
             testsToPlaceLast: [
                 "CT Scanogram CompCt brain +orbit without contrast"
             ]
@@ -287,13 +317,22 @@ document.addEventListener('DOMContentLoaded', function() {
     filterButtons.forEach(button => {
         button.addEventListener('click', () => {
             const discount = parseInt(button.getAttribute('data-discount'));
+
+            // Toggle the selected filter
             if (selectedDiscounts.has(discount)) {
                 selectedDiscounts.delete(discount);
                 button.classList.remove('active');
             } else {
+                // Deselect other filters
+                filterButtons.forEach(btn => {
+                    btn.classList.remove('active');
+                    selectedDiscounts.delete(parseInt(btn.getAttribute('data-discount')));
+                });
+
                 selectedDiscounts.add(discount);
                 button.classList.add('active');
             }
+
             applyFilters();
         });
     });
@@ -301,22 +340,31 @@ document.addEventListener('DOMContentLoaded', function() {
     // Function to apply discount filters
     function applyFilters() {
         let filteredTests = tests;
-        
+
         // Apply search filter if there's a search term
         const searchTerm = testSearch.value.toLowerCase().trim();
         if (searchTerm) {
-            filteredTests = filteredTests.filter(test => 
+            filteredTests = filteredTests.filter(test =>
                 test.Name.toLowerCase().includes(searchTerm)
             );
         }
-    
+
         // Apply discount filters if any are selected
         if (selectedDiscounts.size > 0) {
-            filteredTests = filteredTests.filter(test => 
-                selectedDiscounts.has(test.discount)
-            );
+            const discount = Array.from(selectedDiscounts)[0];
+            if (discount === 12) {
+                // Apply 12% discount to all tests
+                filteredTests = filteredTests.map(test => ({
+                    ...test,
+                    discount: 12
+                }));
+            } else {
+                filteredTests = filteredTests.filter(test =>
+                    selectedDiscounts.has(test.discount)
+                );
+            }
         }
-    
+
         displayTests(filteredTests);
     }
     
@@ -362,4 +410,65 @@ document.addEventListener('DOMContentLoaded', function() {
             comingSoonMessage.style.display = 'block';
         }
     }
+
+
+    
 });
+
+// Function to create and animate the celebration elements
+function createCelebration() {
+    const celebrationContainer = document.querySelector('.celebration-container');
+    
+    // Create stars
+    const starsContainer = document.createElement('div');
+    starsContainer.className = 'stars';
+    for (let i = 0; i < 30; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        star.style.left = `${Math.random() * 100}%`;
+        star.style.top = `${Math.random() * 100}%`;
+        star.style.animationDelay = `${Math.random() * 1}s`;
+        starsContainer.appendChild(star);
+    }
+    celebrationContainer.appendChild(starsContainer);
+
+    // Create confetti
+    for (let i = 0; i < 50; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti-piece';
+        confetti.style.left = `${Math.random() * 100}%`;
+        confetti.style.backgroundColor = `hsl(${Math.random() * 360}, 70%, 50%)`;
+        confetti.style.animation = `confetti ${2 + Math.random() * 2}s ease-out forwards`;
+        confetti.style.animationDelay = `${Math.random() * 0.5}s`;
+        celebrationContainer.appendChild(confetti);
+    }
+}
+
+// Update the popup open handler
+document.querySelector('.info-icon').addEventListener('click', () => {
+    const popup = document.getElementById('info-popup');
+    popup.style.display = 'block';
+    setTimeout(() => popup.classList.add('show'), 10);
+    createCelebration();
+});
+
+// Update the popup close handlers
+document.querySelector('.close-popup').addEventListener('click', closePopup);
+window.addEventListener('click', (e) => {
+    if (e.target === document.getElementById('info-popup')) {
+        closePopup();
+    }
+});
+
+function closePopup() {
+    const popup = document.getElementById('info-popup');
+    popup.classList.remove('show');
+    setTimeout(() => {
+        popup.style.display = 'none';
+        // Clean up celebration elements
+        const container = document.querySelector('.celebration-container');
+        if (container) {
+            container.innerHTML = '';
+        }
+    }, 300);
+}
