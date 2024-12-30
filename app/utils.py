@@ -238,7 +238,6 @@ def generate_email_template(name, tests_details, discount_code, lab_name, is_twe
                         </ul>
                     </div>
                     {code_section}
-                    <p>Your discount code: {discount_code}</p>
                     <p>Your lab test is booked with {lab_name}</p>
                     
                     {special_offer_section}
