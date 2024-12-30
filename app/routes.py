@@ -894,7 +894,158 @@ def register_doctor():
 
 
 
-
+@main.route('/book', methods=['POST'])
+def book():
+    logger = logging.getLogger(__name__)
+    try:
+        name = request.form.get('patient-name', '').strip()
+        phone = request.form.get('phone-number', '').strip()
+        email = request.form.get('email', '').strip()
+        selected_tests = request.form.getlist('selected-tests')
+        lab = request.form.get('lab-select', '').strip()
+        discount_type = request.form.get('discount-type', '').strip()  # Get the discount type
+        
+        # Input Validation
+        if not name or not phone or not email:
+            flash('All input fields are required.', 'error')
+            logger.warning("Form submission with missing fields.")
+            return redirect(url_for('main.index'))
+        
+        if not selected_tests:
+            flash('Please select at least one test.', 'error')
+            logger.warning("Form submission without selecting any tests.")
+            return redirect(url_for('main.index'))
+        
+        db = firestore.client()
+        
+        # Check if user selected 12% discount
+        is_twelve_percent = discount_type == '12'
+        
+        # Logic for different labs
+        if lab == 'chughtai-lab':
+            code, tests_details = move_code_to_availed(name, phone, email, selected_tests)
+            if not code:
+                flash('No available booking codes found.', 'error')
+                return redirect(url_for('main.index'))
+            
+            # Pass the is_twelve_percent flag to send_email
+            send_email(email, name, tests_details, code, "Chughtai Lab", is_twelve_percent=is_twelve_percent)
+            
+            # Store the discount type in availed codes collection
+            current_month = datetime.utcnow().strftime('%m-%Y')
+            availed_code_data = {
+                'name': name,
+                'phone': phone,
+                'email': email,
+                'lab': lab,
+                'code': code,
+                'tests': tests_details,
+                'timestamp': datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'),
+                'discount_type': '12%' if is_twelve_percent else '20-30%'
+            }
+            db.collection('availedCodes').document(current_month).collection('details').document(code).set(availed_code_data)
+            
+            flash('Booking successful! A confirmation email has been sent.', 'success')
+            logger.info(f"Chughtai Lab booking successful for user {email} with code {code} and discount type {discount_type}%")
+        
+        elif lab == 'idc-islamabad':
+            code = 'IDC'
+            tests_ref = db.collection('labs/IDC/tests')
+            tests_details = []
+            for test_id in selected_tests:
+                test_doc = tests_ref.document(test_id).get()
+                if test_doc.exists:
+                    test_data = test_doc.to_dict()
+                    tests_details.append({
+                        'name': test_data.get('Name', 'N/A'),
+                        'original_fee': f"Rs.{test_data.get('Fees', '0.00')}",
+                        'discounted_fee': f"Rs.{float(test_data.get('Fees', '0.00')) * 0.9:.2f}"
+                    })
+            current_month = datetime.utcnow().strftime('%m-%Y')
+            availed_code_data = {
+                'name': name,
+                'phone': phone,
+                'email': email,
+                'lab': lab,
+                'code': code,
+                'tests': tests_details,
+                'timestamp': datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'),
+                'discount_type': '10%'  # IDC has fixed discount
+            }
+            db.collection('availedCodes').document(current_month).collection('details').document(code).set(availed_code_data)
+            send_email(email, name, tests_details, code, "IDC Islamabad", is_twelve_percent=False)  # IDC never gets 12% offer
+            flash('IDC Lab booking successful! A confirmation email has been sent.', 'success')
+            logger.info(f"IDC Lab booking successful for user {email}.")
+        
+        elif lab == 'dr-essa-lab':
+            code = 'hellotabib'
+            tests_ref = db.collection('labs/essa/tests')
+            tests_details = []
+            for test_id in selected_tests:
+                test_doc = tests_ref.document(test_id).get()
+                if test_doc.exists:
+                    test_data = test_doc.to_dict()
+                    tests_details.append({
+                        'name': test_data.get('Name', 'N/A'),
+                        'original_fee': f"Rs.{test_data.get('Fees', '0.00')}",
+                        'discounted_fee': f"Rs.{float(test_data.get('Fees', '0.00')) * 0.8:.2f}"
+                    })
+            current_month = datetime.utcnow().strftime('%m-%Y')
+            availed_code_data = {
+                'name': name,
+                'phone': phone,
+                'email': email,
+                'lab': lab,
+                'code': code,
+                'tests': tests_details,
+                'timestamp': datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'),
+                'discount_type': '20%'  # Dr. Essa Lab has fixed discount
+            }
+            db.collection('availedCodes').document(current_month).collection('details').document(code).set(availed_code_data)
+            send_email(email, name, tests_details, code, "Dr. Essa Lab", is_twelve_percent=False)  # Dr. Essa Lab never gets 12% offer
+            flash('Essa Lab booking successful! A confirmation email has been sent.', 'success')
+            logger.info(f"Essa Lab booking successful for user {email}.")
+        
+        elif lab == 'another-lab':
+            code = 'HTB'
+            tests_ref = db.collection('labs/excel/tests')
+            tests_details = []
+            for test_id in selected_tests:
+                test_doc = tests_ref.document(test_id).get()
+                if test_doc.exists:
+                    test_data = test_doc.to_dict()
+                    tests_details.append({
+                        'name': test_data.get('Name', 'N/A'),
+                        'original_fee': f"Rs.{test_data.get('Fees', '0.00')}",
+                        'discounted_fee': f"Rs.{float(test_data.get('Fees', '0.00')) * 0.85:.2f}"
+                    })
+            current_month = datetime.utcnow().strftime('%m-%Y')
+            availed_code_data = {
+                'name': name,
+                'phone': phone,
+                'email': email,
+                'lab': lab,
+                'code': code,
+                'tests': tests_details,
+                'timestamp': datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'),
+                'discount_type': '15%'  # Excel Lab has fixed discount
+            }
+            db.collection('availedCodes').document(current_month).collection('details').document(code).set(availed_code_data)
+            send_email(email, name, tests_details, code, "Excel Lab", is_twelve_percent=False)  # Excel Lab never gets 12% offer
+            flash('Excel Lab booking successful! A confirmation email has been sent.', 'success')
+            logger.info(f"Excel Lab booking successful for user {email}.")
+        
+        else:
+            flash('Invalid lab selection.', 'error')
+            logger.warning(f"Invalid lab selection: {lab}")
+            return redirect(url_for('main.index'))
+        
+        return redirect(url_for('main.index'))
+    
+    except Exception as e:
+        flash('An unexpected error occurred. Please try again later.', 'error')
+        logger.error(f"Unexpected error during booking: {e}")
+        return redirect(url_for('main.index'))
 
 
 @main.route('/tests', methods=['GET'])
