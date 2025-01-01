@@ -959,8 +959,9 @@ def book():
                     tests_details.append({
                         'name': test_data.get('Name', 'N/A'),
                         'original_fee': f"Rs.{test_data.get('Fees', '0.00')}",
-                        'discounted_fee': f"Rs.{float(test_data.get('Fees', '0.00')) * 0.9:.2f}"
+                        'discounted_fee': f"Rs.{test_data.get('Fees', '0.00')}"
                     })
+            
             current_month = datetime.utcnow().strftime('%m-%Y')
             availed_code_data = {
                 'name': name,
@@ -970,7 +971,7 @@ def book():
                 'code': code,
                 'tests': tests_details,
                 'timestamp': datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'),
-                'discount_type': '10%'  # IDC has fixed discount
+                'discount_type': '10%'
             }
             db.collection('availedCodes').document(current_month).collection('details').document(code).set(availed_code_data)
             send_email(email, name, tests_details, code, "IDC Islamabad", is_twelve_percent=False)  # IDC never gets 12% offer
@@ -988,8 +989,9 @@ def book():
                     tests_details.append({
                         'name': test_data.get('Name', 'N/A'),
                         'original_fee': f"Rs.{test_data.get('Fees', '0.00')}",
-                        'discounted_fee': f"Rs.{float(test_data.get('Fees', '0.00')) * 0.8:.2f}"
+                        'discounted_fee': f"Rs.{test_data.get('Fees', '0.00')}"
                     })
+            
             current_month = datetime.utcnow().strftime('%m-%Y')
             availed_code_data = {
                 'name': name,
@@ -999,7 +1001,7 @@ def book():
                 'code': code,
                 'tests': tests_details,
                 'timestamp': datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'),
-                'discount_type': '20%'  # Dr. Essa Lab has fixed discount
+                'discount_type': '20%'
             }
             db.collection('availedCodes').document(current_month).collection('details').document(code).set(availed_code_data)
             send_email(email, name, tests_details, code, "Dr. Essa Lab", is_twelve_percent=False)  # Dr. Essa Lab never gets 12% offer
@@ -1017,8 +1019,9 @@ def book():
                     tests_details.append({
                         'name': test_data.get('Name', 'N/A'),
                         'original_fee': f"Rs.{test_data.get('Fees', '0.00')}",
-                        'discounted_fee': f"Rs.{float(test_data.get('Fees', '0.00')) * 0.85:.2f}"
+                        'discounted_fee': f"Rs.{test_data.get('Fees', '0.00')}"
                     })
+            
             current_month = datetime.utcnow().strftime('%m-%Y')
             availed_code_data = {
                 'name': name,
@@ -1028,7 +1031,7 @@ def book():
                 'code': code,
                 'tests': tests_details,
                 'timestamp': datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'),
-                'discount_type': '15%'  # Excel Lab has fixed discount
+                'discount_type': '15%'
             }
             db.collection('availedCodes').document(current_month).collection('details').document(code).set(availed_code_data)
             send_email(email, name, tests_details, code, "Excel Lab", is_twelve_percent=False)  # Excel Lab never gets 12% offer
@@ -1046,7 +1049,6 @@ def book():
         flash('An unexpected error occurred. Please try again later.', 'error')
         logger.error(f"Unexpected error during booking: {e}")
         return redirect(url_for('main.index'))
-
 
 @main.route('/tests', methods=['GET'])
 def get_tests():
