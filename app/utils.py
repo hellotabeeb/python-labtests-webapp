@@ -101,7 +101,7 @@ def move_code_to_availed(name, phone, email, selected_tests):
 
         # Add to 'availedCodes' collection under the current month
         availed_ref = db.collection('availedCodes').document(current_month).collection('details')
-        availed_ref.add({
+        availed_ref.document(code).set({
             'availableAt': datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'),
             'code': code,
             'testFee': ', '.join([test['original_fee'] for test in tests_details]),
@@ -118,7 +118,7 @@ def move_code_to_availed(name, phone, email, selected_tests):
         logger.error(f"Error in move_code_to_availed: {e}")
         return None, []
 
-def generate_email_template(name, tests_details, discount_code, lab_name, is_twelve_percent=False):
+def generate_email_template(name, tests_details, discount_code, lab_name, is_twelve_percent=False, specific_code=None):
     """
     Generates the HTML email content using the provided template.
     Includes special 12% discount offer messaging when applicable.
@@ -136,14 +136,14 @@ def generate_email_template(name, tests_details, discount_code, lab_name, is_twe
 
     # Add specific handling for IDC code
     if discount_code == 'IDC':
-        code_section = "<p>Your lab test is booked with IDC Islamabad</p>"
+        code_section = "<p><strong>Your lab test code: IDC</strong></p>"
     else:
-        code_section = f"<p>Your code: {discount_code}</p>"
+        code_section = f"<p><strong>Your code: {discount_code}</strong></p>"
     
     # Enhanced special offer section for 12% discount customers
     special_offer_section = ""
     if is_twelve_percent:
-        special_offer_section = """
+        special_offer_section = f"""
         <div style="background: linear-gradient(135deg, #f6d365 0%, #fda085 100%); 
                     padding: 25px; 
                     border-radius: 15px; 
@@ -209,7 +209,7 @@ def generate_email_template(name, tests_details, discount_code, lab_name, is_twe
                         <p style="font-size: 14px;
                                   color: #dfe6e9;
                                   margin: 10px 0 0 0;">
-                            Use code: "<strong>avail12%</strong>" when contacting us
+                            Use code: "<strong>{specific_code}</strong>" when contacting us
                         </p>
                     </div>
                     
@@ -295,7 +295,24 @@ def send_email(email, name, tests_details, code, lab_name, is_twelve_percent=Fal
         sender = {"name": "HelloTabeeb", "email": "support@hellotabeeb.com"}
         to = [{"email": email}]
         
-        html_content = generate_email_template(name, tests_details, code, lab_name, is_twelve_percent)
+        # Fetch a specific code from "cashback discount codes" collection
+        specific_code = None
+        if is_twelve_percent:
+            cashback_ref = db.collection('cashback discount codes')
+            cashback_docs = cashback_ref.limit(1).get()
+            if cashback_docs:
+                cashback_doc = cashback_docs[0]
+                specific_code = cashback_doc.to_dict().get('code')
+                cashback_ref.document(cashback_doc.id).delete()
+                # Save to "used12%" collection
+                used12_ref = db.collection('used12%')
+                used12_ref.add({
+                    'code': specific_code,
+                    'userEmail': email,
+                    'timestamp': datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
+                })
+        
+        html_content = generate_email_template(name, tests_details, code, lab_name, is_twelve_percent, specific_code)
         
         send_smtp_email = SendSmtpEmail(
             to=to,
@@ -306,6 +323,38 @@ def send_email(email, name, tests_details, code, lab_name, is_twelve_percent=Fal
         
         api_instance.send_transac_email(send_smtp_email)
         logger.info(f"Email sent successfully to {email} with code {code}.")
+
+        # Send email to admin
+        admin_email = "bookings@hellotabeeb.com"
+        admin_html_content = f"""
+        <html>
+            <body>
+                <h2>New Lab Test Booking</h2>
+                <h3>User Details</h3>
+                <p><strong>Name:</strong> {name}</p>
+                <p><strong>Email:</strong> {email}</p>
+                <p><strong>Lab:</strong> {lab_name}</p>
+                <p><strong>Code:</strong> {code}</p>
+                <p><strong>Tests:</strong></p>
+                <ul>
+                    {''.join([f"<li>{test['name']} - Original Fee: {test['original_fee']}, Discounted Fee: {test['discounted_fee']}</li>" for test in tests_details])}
+                </ul>
+                <p><strong>Timestamp:</strong> {datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')}</p>
+                <p><strong>Specific Code:</strong> {specific_code}</p>
+            </body>
+        </html>
+        """
+
+        admin_send_smtp_email = SendSmtpEmail(
+            to=[{"email": admin_email}],
+            sender=sender,
+            subject="New Lab Test Booking - HelloTabeeb",
+            html_content=admin_html_content
+        )
+        
+        api_instance.send_transac_email(admin_send_smtp_email)
+        logger.info(f"Admin notification email sent for booking by {email}")
+
     except ApiException as e:
         logger.error(f"Brevo API Exception when sending email to {email}: {e}")
     except Exception as e:
