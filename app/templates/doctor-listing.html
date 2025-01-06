@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Listing</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/doctor-listing.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <a href="{{ url_for('main.appointment') }}">
+                <img src="{{ url_for('static', filename='121.png') }}" alt="logo" class="logo">
+            </a>
+        </div>
+        <div class="specialty-headline">
+            <h2 id="specialtyTitle">{{ category | capitalize }} Doctors</h2>
+        </div>
+        <hr>
+        <div class="search-container">
+            <input type="text" placeholder="Search doctors by name..." id="doctorSearch">
+        </div>
+    </header>
+
+    <div class="doctors-grid" id="doctorsContainer">
+        <!-- Doctors will be populated here dynamically -->
+    </div>
+
+    <template id="doctorCardTemplate">
+        <div class="doctor-card">
+            <div class="doctor-image">
+                <img src="/api/placeholder/120/120" alt="Doctor's photo">
+                <span class="online-status"></span>
+            </div>
+            <div class="doctor-info">
+                <h3 class="doctor-name"></h3>
+                <p class="doctor-specialty"><i class="fas fa-user-md"></i> <span class="specialty-text"></span></p>
+                <p class="experience"><i class="fas fa-briefcase-medical"></i> <span class="experience-text"></span></p>
+                <p class="hospital"><i class="fas fa-hospital"></i> <span class="hospital-text"></span></p>
+            </div>
+            <div class="appointment-info">
+                <button class="book-button">Book Appointment</button>
+                <span class="next-available" style="font-style: italic;"></span>
+            </div>
+        </div>
+    </template>
+
+    <!-- Popup Dialog -->
+    <div id="bookingDialog" class="booking-dialog" style="display: none;">
+        <div class="dialog-content">
+            <span class="close-button">&times;</span>
+            <h2>Book Appointment</h2>
+            <form id="bookingForm">
+                <div class="input-group">
+                    <label for="patient-name">Name</label>
+                    <input type="text" id="patient-name" name="patient-name" required>
+                </div>
+                <div class="input-group">
+                    <label for="patient-age">Age</label>
+                    <input type="number" id="patient-age" name="patient-age" required>
+                </div>
+                <div class="input-group">
+                    <label for="patient-phone">Phone Number</label>
+                    <input type="tel" id="patient-phone" name="patient-phone" required>
+                </div>
+                <div class="input-group">
+                    <label for="patient-email">Email</label>
+                    <input type="email" id="patient-email" name="patient-email" required>
+                </div>
+                <div class="input-group">
+                    <label for="appointment-day">Preferred Day</label>
+                    <select id="appointment-day" name="appointment-day" required>
+                        <option value="Monday">Monday</option>
+                        <option value="Tuesday">Tuesday</option>
+                        <option value="Wednesday">Wednesday</option>
+                        <option value="Thursday">Thursday</option>
+                        <option value="Friday">Friday</option>
+                        <option value="Saturday">Saturday</option>
+                        <option value="Sunday">Sunday</option>
+                    </select>
+                </div>
+                <button type="submit">Confirm Booking</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Progress Indicator -->
+    <div id="progress-indicator" class="loading-spinner" style="display: none;">
+        <div class="spinner"></div>
+    </div>
+
+    <script type="module" src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script type="module" src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
+    <script type="module" src="{{ url_for('static', filename='js/doctor-listing.js') }}"></script>
+</body>
+</html>
