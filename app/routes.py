@@ -5,7 +5,7 @@ import logging
 import firebase_admin
 from firebase_admin import firestore
 from . import db
-from firebase_admin import storage
+from firebase_admin import credentials, storage
 from werkzeug.utils import secure_filename
 import dropbox
 import os
@@ -17,6 +17,8 @@ from datetime import datetime
 from brevo_python import Configuration, ApiClient, TransactionalEmailsApi, SendSmtpEmail
 from brevo_python.rest import ApiException
 from datetime import datetime
+import json
+from firebase_admin import firestore, credentials, initialize_app, get_app, _apps
 
 
 
@@ -29,11 +31,112 @@ configuration.api_key['api-key'] = os.getenv('BREVO_API_KEY')
 api_client = ApiClient(configuration)
 api_instance = TransactionalEmailsApi(api_client)
 
+
+
+# Initialize Firebase Admin SDK
+if not _apps:
+    cred = credentials.Certificate('app/serviceAccountKey.json')
+    initialize_app(cred)
+db = firestore.client()
+
+@main.route('/firebase-config')
+def firebase_config():
+    with open('app/serviceAccountKey.json') as f:
+        config = json.load(f)
+    firebase_config = {
+        "apiKey": os.getenv('FIREBASE_API_KEY'),
+        "authDomain": os.getenv('FIREBASE_AUTH_DOMAIN'),
+        "projectId": config.get('project_id'),
+        "storageBucket": os.getenv('FIREBASE_STORAGE_BUCKET'),
+        "messagingSenderId": os.getenv('FIREBASE_MESSAGING_SENDER_ID'),
+        "appId": os.getenv('FIREBASE_APP_ID'),
+        "measurementId": os.getenv('FIREBASE_MEASUREMENT_ID')
+    }
+    return jsonify(firebase_config)
+
+
+
 @main.route('/')
 def index():
-    logger = logging.getLogger(__name__)
-    logger.info("Index route accessed.")
     return render_template('index.html')
+
+@main.route('/appointment')
+def appointment():
+    return render_template('appointment.html')
+
+@main.route('/appointment/doctor-listing/<category>')
+def doctor_listing(category):
+    return render_template('doctor-listing.html', category=category)
+
+@main.route('/book-appointment', methods=['POST'])
+def book_appointment():
+    try:
+        data = request.json
+        doctor_name = data.get('doctorName')
+        doctor_specialty = data.get('doctorSpecialty')
+        doctor_email = data.get('doctorEmail')
+        patient_name = data.get('patientName')
+        patient_age = data.get('patientAge')
+        patient_phone = data.get('patientPhone')
+        patient_email = data.get('patientEmail')
+        appointment_day = data.get('appointmentDay')
+
+        # Send email to admin
+        admin_email = "ahadnaseer47@gmail.com"
+        admin_html_content = f"""
+        <html>
+            <body>
+                <h2>New Appointment Booking</h2>
+                <h3>Doctor Details</h3>
+                <p><strong>Name:</strong> {doctor_name}</p>
+                <p><strong>Specialty:</strong> {doctor_specialty}</p>
+                <p><strong>Email:</strong> {doctor_email}</p>
+                <h3>Patient Details</h3>
+                <p><strong>Name:</strong> {patient_name}</p>
+                <p><strong>Age:</strong> {patient_age}</p>
+                <p><strong>Phone:</strong> {patient_phone}</p>
+                <p><strong>Email:</strong> {patient_email}</p>
+                <p><strong>Preferred Day:</strong> {appointment_day}</p>
+            </body>
+        </html>
+        """
+
+        admin_send_smtp_email = SendSmtpEmail(
+            to=[{"email": admin_email}],
+            sender={"name": "HelloTabeeb", "email": "support@hellotabeeb.com"},
+            subject="New Appointment Booking - HelloTabeeb",
+            html_content=admin_html_content
+        )
+        api_instance.send_transac_email(admin_send_smtp_email)
+
+        # Send email to customer
+        customer_html_content = f"""
+        <html>
+            <body>
+                <h2>Appointment Booking Confirmation</h2>
+                <p>Dear {patient_name},</p>
+                <p>Thank you for booking an appointment with {doctor_name}. Your booking has been confirmed for {appointment_day}.</p>
+                <p>You will be contacted soon on your provided number: {patient_phone}.</p>
+                <p>Thank you!</p>
+            </body>
+        </html>
+        """
+
+        customer_send_smtp_email = SendSmtpEmail(
+            to=[{"email": patient_email}],
+            sender={"name": "HelloTabeeb", "email": "support@hellotabeeb.com"},
+            subject="Appointment Booking Confirmation - HelloTabeeb",
+            html_content=customer_html_content
+        )
+        api_instance.send_transac_email(customer_send_smtp_email)
+
+        return jsonify({'success': True, 'message': 'Booking confirmed!'})
+    except ApiException as e:
+        current_app.logger.error(f"Brevo API Exception: {e}")
+        return jsonify({'success': False, 'message': 'Booking failed. Please try again.'}), 500
+    except Exception as e:
+        current_app.logger.error(f"Unexpected error: {e}")
+        return jsonify({'success': False, 'message': 'Booking failed. Please try again.'}), 500
 
 
 @main.route('/submit-card-purchase', methods=['POST'])
@@ -1089,3 +1192,7 @@ def get_tests():
     except Exception as e:
         logger.error(f"Error fetching tests: {e}")
         return jsonify([])
+    
+    
+
+   
