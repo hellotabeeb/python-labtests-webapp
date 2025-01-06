@@ -86,7 +86,7 @@ def book_appointment():
         appointment_day = data.get('appointmentDay')
 
         # Send email to admin
-        admin_email = "ahadnaseer47@gmail.com"
+        admin_email = "shahzad892@gmail.com"
         admin_html_content = f"""
         <html>
             <body>
