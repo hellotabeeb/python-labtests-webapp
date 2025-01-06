@@ -19,6 +19,8 @@ from brevo_python.rest import ApiException
 from datetime import datetime
 import json
 from firebase_admin import firestore, credentials, initialize_app, get_app, _apps
+from firebase_admin import firestore, credentials, initialize_app, _apps
+
 
 
 
@@ -41,18 +43,23 @@ db = firestore.client()
 
 @main.route('/firebase-config')
 def firebase_config():
-    with open('app/serviceAccountKey.json') as f:
-        config = json.load(f)
-    firebase_config = {
-        "apiKey": os.getenv('FIREBASE_API_KEY'),
-        "authDomain": os.getenv('FIREBASE_AUTH_DOMAIN'),
-        "projectId": config.get('project_id'),
-        "storageBucket": os.getenv('FIREBASE_STORAGE_BUCKET'),
-        "messagingSenderId": os.getenv('FIREBASE_MESSAGING_SENDER_ID'),
-        "appId": os.getenv('FIREBASE_APP_ID'),
-        "measurementId": os.getenv('FIREBASE_MEASUREMENT_ID')
-    }
-    return jsonify(firebase_config)
+    try:
+        with open('app/serviceAccountKey.json') as f:
+            config = json.load(f)
+        firebase_config = {
+            "apiKey": os.getenv('FIREBASE_API_KEY'),
+            "authDomain": os.getenv('FIREBASE_AUTH_DOMAIN'),
+            "projectId": config.get('project_id'),
+            "storageBucket": os.getenv('FIREBASE_STORAGE_BUCKET'),
+            "messagingSenderId": os.getenv('FIREBASE_MESSAGING_SENDER_ID'),
+            "appId": os.getenv('FIREBASE_APP_ID'),
+            "measurementId": os.getenv('FIREBASE_MEASUREMENT_ID')
+        }
+        return jsonify(firebase_config)
+    except Exception as e:
+        current_app.logger.error(f"Error fetching Firebase config: {e}")
+        return jsonify({"error": "Failed to fetch Firebase config"}), 500
+
 
 
 

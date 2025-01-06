@@ -6,6 +6,9 @@ import { getFirestore, collection, getDocs } from 'https://www.gstatic.com/fireb
 async function initializeFirebase() {
     try {
         const response = await fetch('/firebase-config');
+        if (!response.ok) {
+            throw new Error('Failed to fetch Firebase config');
+        }
         const firebaseConfig = await response.json();
         if (!firebaseConfig.projectId) {
             throw new Error('Firebase config is missing projectId');
