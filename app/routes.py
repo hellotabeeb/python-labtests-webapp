@@ -34,42 +34,15 @@ api_client = ApiClient(configuration)
 api_instance = TransactionalEmailsApi(api_client)
 
 
-@main.route('/firebase-config')
-def firebase_config():
-    try:
-        with open('app/serviceAccountKey.json') as f:
-            config = json.load(f)
-        firebase_config = {
-            "apiKey": os.getenv('FIREBASE_API_KEY'),
-            "authDomain": os.getenv('FIREBASE_AUTH_DOMAIN'),
-            "projectId": config.get('project_id'),
-            "storageBucket": os.getenv('FIREBASE_STORAGE_BUCKET'),
-            "messagingSenderId": os.getenv('FIREBASE_MESSAGING_SENDER_ID'),
-            "appId": os.getenv('FIREBASE_APP_ID'),
-            "measurementId": os.getenv('FIREBASE_MEASUREMENT_ID')
-        }
-        return jsonify(firebase_config)
-    except Exception as e:
-        current_app.logger.error(f"Error fetching Firebase config: {e}")
-        return jsonify({"error": "Failed to fetch Firebase config"}), 500
-
-
-
-# # Initialize Firebase Admin SDK
-# if not _apps:
-#     service_account_info = json.loads(os.getenv('SERVICE_ACCOUNT_KEY'))
-#     cred = credentials.Certificate(service_account_info)
-#     initialize_app(cred)
-# db = firestore.client()
-
 # @main.route('/firebase-config')
 # def firebase_config():
 #     try:
-#         service_account_info = json.loads(os.getenv('SERVICE_ACCOUNT_KEY'))
+#         with open('app/serviceAccountKey.json') as f:
+#             config = json.load(f)
 #         firebase_config = {
 #             "apiKey": os.getenv('FIREBASE_API_KEY'),
 #             "authDomain": os.getenv('FIREBASE_AUTH_DOMAIN'),
-#             "projectId": service_account_info.get('project_id'),
+#             "projectId": config.get('project_id'),
 #             "storageBucket": os.getenv('FIREBASE_STORAGE_BUCKET'),
 #             "messagingSenderId": os.getenv('FIREBASE_MESSAGING_SENDER_ID'),
 #             "appId": os.getenv('FIREBASE_APP_ID'),
@@ -79,6 +52,33 @@ def firebase_config():
 #     except Exception as e:
 #         current_app.logger.error(f"Error fetching Firebase config: {e}")
 #         return jsonify({"error": "Failed to fetch Firebase config"}), 500
+
+
+
+# Initialize Firebase Admin SDK
+if not _apps:
+    service_account_info = json.loads(os.getenv('SERVICE_ACCOUNT_KEY'))
+    cred = credentials.Certificate(service_account_info)
+    initialize_app(cred)
+db = firestore.client()
+
+@main.route('/firebase-config')
+def firebase_config():
+    try:
+        service_account_info = json.loads(os.getenv('SERVICE_ACCOUNT_KEY'))
+        firebase_config = {
+            "apiKey": os.getenv('FIREBASE_API_KEY'),
+            "authDomain": os.getenv('FIREBASE_AUTH_DOMAIN'),
+            "projectId": service_account_info.get('project_id'),
+            "storageBucket": os.getenv('FIREBASE_STORAGE_BUCKET'),
+            "messagingSenderId": os.getenv('FIREBASE_MESSAGING_SENDER_ID'),
+            "appId": os.getenv('FIREBASE_APP_ID'),
+            "measurementId": os.getenv('FIREBASE_MEASUREMENT_ID')
+        }
+        return jsonify(firebase_config)
+    except Exception as e:
+        current_app.logger.error(f"Error fetching Firebase config: {e}")
+        return jsonify({"error": "Failed to fetch Firebase config"}), 500
 
 @main.route('/')
 def index():
