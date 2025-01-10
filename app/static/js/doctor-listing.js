@@ -127,21 +127,32 @@ function closeBookingDialog() {
 // Handle booking form submission
 async function handleBookingFormSubmit(event, doctor) {
     event.preventDefault();
-
     const form = event.target;
     const formData = new FormData(form);
+    
+    // Add doctor details to FormData
+    formData.append('doctorName', doctor.name);
+    formData.append('doctorSpecialty', doctor.specialty);
+    formData.append('doctorEmail', doctor.email);
+    
+    // Convert form field names to match backend expectations
+    formData.append('patientName', formData.get('patient-name'));
+    formData.append('patientAge', formData.get('patient-age'));
+    formData.append('patientPhone', formData.get('patient-phone'));
+    formData.append('patientEmail', formData.get('patient-email'));
+    formData.append('appointmentDay', formData.get('appointment-day'));
+    formData.append('appointmentTime', formData.get('appointment-time'));
+    formData.append('patientRemarks', formData.get('patient-remarks'));
 
-    const bookingDetails = {
-        doctorId: doctor.id,
-        doctorName: doctor.name,
-        doctorSpecialty: doctor.specialty,
-        doctorEmail: doctor.email,
-        patientName: formData.get('patient-name'),
-        patientAge: formData.get('patient-age'),
-        patientPhone: formData.get('patient-phone'),
-        patientEmail: formData.get('patient-email'),
-        appointmentDay: formData.get('appointment-day'),
-    };
+    // Add attachment to FormData
+    const attachment = formData.get('attachment');
+    if (attachment && attachment.size > 10 * 1024 * 1024) {
+        alert('Attachment size exceeds 10MB limit.');
+        return;
+    }
+    if (attachment) {
+        formData.append('attachment', attachment);
+    }
 
     // Show progress indicator
     const progressIndicator = document.getElementById('progress-indicator');
@@ -150,10 +161,7 @@ async function handleBookingFormSubmit(event, doctor) {
     try {
         const response = await fetch('/book-appointment', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(bookingDetails),
+            body: formData,
         });
 
         const result = await response.json();
