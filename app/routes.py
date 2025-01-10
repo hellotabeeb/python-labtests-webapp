@@ -34,6 +34,26 @@ api_client = ApiClient(configuration)
 api_instance = TransactionalEmailsApi(api_client)
 
 
+# @main.route('/firebase-config')
+# def firebase_config():
+#     try:
+#         with open('app/serviceAccountKey.json') as f:
+#             config = json.load(f)
+#         firebase_config = {
+#             "apiKey": os.getenv('FIREBASE_API_KEY'),
+#             "authDomain": os.getenv('FIREBASE_AUTH_DOMAIN'),
+#             "projectId": config.get('project_id'),
+#             "storageBucket": os.getenv('FIREBASE_STORAGE_BUCKET'),
+#             "messagingSenderId": os.getenv('FIREBASE_MESSAGING_SENDER_ID'),
+#             "appId": os.getenv('FIREBASE_APP_ID'),
+#             "measurementId": os.getenv('FIREBASE_MEASUREMENT_ID')
+#         }
+#         return jsonify(firebase_config)
+#     except Exception as e:
+#         current_app.logger.error(f"Error fetching Firebase config: {e}")
+#         return jsonify({"error": "Failed to fetch Firebase config"}), 500
+
+
 
 # Initialize Firebase Admin SDK
 if not _apps:
@@ -75,7 +95,35 @@ def doctor_listing(category):
 @main.route('/book-appointment', methods=['POST'])
 def book_appointment():
     try:
-        data = request.json
+        data = request.form
+        current_app.logger.info(f"Received form data: {data}")
+
+        # Validate required fields
+        required_fields = {
+            'doctorName': 'Doctor Name',
+            'doctorSpecialty': 'Doctor Specialty',
+            'doctorEmail': 'Doctor Email',
+            'patientName': 'Patient Name',
+            'patientAge': 'Patient Age',
+            'patientPhone': 'Patient Phone',
+            'patientEmail': 'Patient Email',
+            'appointmentDay': 'Appointment Day',
+            'appointmentTime': 'Appointment Time'
+        }
+
+        # Check for missing required fields
+        missing_fields = []
+        for field, label in required_fields.items():
+            if not data.get(field):
+                missing_fields.append(label)
+        
+        if missing_fields:
+            return jsonify({
+                'success': False, 
+                'message': f'Missing required fields: {", ".join(missing_fields)}'
+            }), 400
+
+        # Extract form data
         doctor_name = data.get('doctorName')
         doctor_specialty = data.get('doctorSpecialty')
         doctor_email = data.get('doctorEmail')
@@ -84,9 +132,58 @@ def book_appointment():
         patient_phone = data.get('patientPhone')
         patient_email = data.get('patientEmail')
         appointment_day = data.get('appointmentDay')
+        appointment_time = data.get('appointmentTime')
+        patient_remarks = data.get('patientRemarks', '')  # Optional field
 
-        # Send email to admin
-        admin_email = "shahzad892@gmail.com"
+        # Handle file attachment
+        attachment = request.files.get('attachment')
+        current_app.logger.info(f"Received booking request for {patient_name} with attachment: {attachment}")
+
+        attachment_url = None
+        if attachment:
+            # Validate file type
+            if attachment.mimetype not in ['image/jpeg', 'image/png', 'application/pdf']:
+                current_app.logger.error("Invalid file type. Only JPG, PNG, and PDF are allowed.")
+                return jsonify({
+                    'success': False, 
+                    'message': 'Invalid file type. Only JPG, PNG, and PDF are allowed.'
+                }), 400
+
+            # Validate file size (10MB limit)
+            if attachment.content_length > 10 * 1024 * 1024:
+                current_app.logger.error("File size exceeds 10MB limit.")
+                return jsonify({
+                    'success': False, 
+                    'message': 'File size exceeds 10MB limit.'
+                }), 400
+
+            # Upload attachment to Google Drive
+            file_name = secure_filename(f"{patient_name}_{datetime.utcnow().strftime('%Y%m%d%H%M%S')}_{attachment.filename}")
+            file_metadata = {
+                'name': file_name, 
+                'parents': ['1cv8hx__BI6ZAPd4H_tXqCecO6UZ8ivua']
+            }
+            media = MediaIoBaseUpload(
+                attachment.stream, 
+                mimetype=attachment.mimetype, 
+                resumable=True
+            )
+            file = drive_service.files().create(
+                body=file_metadata, 
+                media_body=media, 
+                fields='id,webViewLink'
+            ).execute()
+            
+            # Make file accessible via link
+            drive_service.permissions().create(
+                fileId=file['id'], 
+                body={'type': 'anyone', 'role': 'reader'}
+            ).execute()
+            
+            attachment_url = file.get('webViewLink')
+            current_app.logger.info(f"File uploaded to Google Drive with URL: {attachment_url}")
+
+        # Prepare admin email content
         admin_html_content = f"""
         <html>
             <body>
@@ -101,46 +198,79 @@ def book_appointment():
                 <p><strong>Phone:</strong> {patient_phone}</p>
                 <p><strong>Email:</strong> {patient_email}</p>
                 <p><strong>Preferred Day:</strong> {appointment_day}</p>
+                <p><strong>Preferred Time:</strong> {appointment_time}</p>
+                <p><strong>Remarks:</strong> {patient_remarks}</p>
+                {f'<p><strong>Attachment:</strong> <a href="{attachment_url}">View Attachment</a></p>' if attachment_url else ''}
             </body>
         </html>
         """
 
+        # Send email to admin
+        admin_email = "ahadnaseer47@gmail.com"
         admin_send_smtp_email = SendSmtpEmail(
-            to=[{"email": admin_email}],
-            sender={"name": "HelloTabeeb", "email": "support@hellotabeeb.com"},
+            to=[{
+                "email": admin_email,
+                "name": "Admin"  # Added name field
+            }],
+            sender={
+                "name": "HelloTabeeb",
+                "email": "support@hellotabeeb.com"
+            },
             subject="New Appointment Booking - HelloTabeeb",
             html_content=admin_html_content
         )
+        current_app.logger.info(f"Sending admin email: {admin_send_smtp_email}")
         api_instance.send_transac_email(admin_send_smtp_email)
 
-        # Send email to customer
+        # Prepare customer email content
         customer_html_content = f"""
         <html>
             <body>
                 <h2>Appointment Booking Confirmation</h2>
                 <p>Dear {patient_name},</p>
-                <p>Thank you for booking an appointment with {doctor_name}. Your booking has been confirmed for {appointment_day}.</p>
+                <p>Thank you for booking an appointment with {doctor_name}. Your booking has been confirmed for {appointment_day} at {appointment_time}.</p>
                 <p>You will be contacted soon on your provided number: {patient_phone}.</p>
-                <p>Thank you!</p>
+                <h3>Appointment Details:</h3>
+                <p><strong>Doctor:</strong> {doctor_name}</p>
+                <p><strong>Specialty:</strong> {doctor_specialty}</p>
+                <p><strong>Day:</strong> {appointment_day}</p>
+                <p><strong>Time:</strong> {appointment_time}</p>
+                <p>If you need to make any changes to your appointment, please contact us at support@hellotabeeb.com or +92 335 1626806</p>
+                <p>Thank you for choosing HelloTabeeb!</p>
             </body>
         </html>
         """
 
+        # Send email to customer
         customer_send_smtp_email = SendSmtpEmail(
-            to=[{"email": patient_email}],
-            sender={"name": "HelloTabeeb", "email": "support@hellotabeeb.com"},
+            to=[{
+                "email": patient_email,
+                "name": patient_name  # Added name field
+            }],
+            sender={
+                "name": "HelloTabeeb",
+                "email": "support@hellotabeeb.com"
+            },
             subject="Appointment Booking Confirmation - HelloTabeeb",
             html_content=customer_html_content
         )
+        current_app.logger.info(f"Sending customer email: {customer_send_smtp_email}")
         api_instance.send_transac_email(customer_send_smtp_email)
 
         return jsonify({'success': True, 'message': 'Booking confirmed!'})
+
     except ApiException as e:
         current_app.logger.error(f"Brevo API Exception: {e}")
-        return jsonify({'success': False, 'message': 'Booking failed. Please try again.'}), 500
+        return jsonify({
+            'success': False, 
+            'message': 'Email notification failed. Please contact support.'
+        }), 500
     except Exception as e:
         current_app.logger.error(f"Unexpected error: {e}")
-        return jsonify({'success': False, 'message': 'Booking failed. Please try again.'}), 500
+        return jsonify({
+            'success': False, 
+            'message': 'Booking failed. Please try again.'
+        }), 500
 
 
 @main.route('/submit-card-purchase', methods=['POST'])
