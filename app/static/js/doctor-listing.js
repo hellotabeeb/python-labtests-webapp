@@ -93,7 +93,7 @@ function renderDoctorCards(doctors) {
         if (hospitalElement) hospitalElement.textContent = doctor.hospital;
 
         const availableTimeElement = clone.querySelector('.next-available');
-        if (availableTimeElement) availableTimeElement.textContent = `Available: ${doctor.availableTime}`;
+        if (availableTimeElement) availableTimeElement.textContent = `Availability: ${doctor.availableTime}`;
 
         const doctorImageElement = clone.querySelector('.doctor-image img');
         if (doctorImageElement) doctorImageElement.src = doctor.pictureLink;
@@ -102,20 +102,23 @@ function renderDoctorCards(doctors) {
         if (onlineStatusElement) onlineStatusElement.classList.add(doctor.isOnline ? 'online' : 'offline');
         
         // Add event listeners to buttons
-        const bookButton = clone.querySelector('.book-button');
-        if (bookButton) bookButton.addEventListener('click', () => openBookingDialog(doctor));
+        const inclinicButton = clone.querySelector('.inclinic-button');
+        if (inclinicButton) inclinicButton.addEventListener('click', () => openBookingDialog(doctor, 'InClinic'));
+
+        const onlineButton = clone.querySelector('.online-button');
+        if (onlineButton) onlineButton.addEventListener('click', () => openBookingDialog(doctor, 'Online'));
 
         doctorsContainer.appendChild(clone);
     });
 }
 
 // Open booking dialog
-function openBookingDialog(doctor) {
+function openBookingDialog(doctor, appointmentType) {
     const dialog = document.getElementById('bookingDialog');
     dialog.style.display = 'block';
 
     const form = document.getElementById('bookingForm');
-    form.onsubmit = (e) => handleBookingFormSubmit(e, doctor);
+    form.onsubmit = (e) => handleBookingFormSubmit(e, doctor, appointmentType);
 }
 
 // Close booking dialog
@@ -125,15 +128,16 @@ function closeBookingDialog() {
 }
 
 // Handle booking form submission
-async function handleBookingFormSubmit(event, doctor) {
+async function handleBookingFormSubmit(event, doctor, appointmentType) {
     event.preventDefault();
     const form = event.target;
     const formData = new FormData(form);
     
-    // Add doctor details to FormData
+    // Add doctor details and appointment type to FormData
     formData.append('doctorName', doctor.name);
     formData.append('doctorSpecialty', doctor.specialty);
     formData.append('doctorEmail', doctor.email);
+    formData.append('appointmentType', appointmentType); // Add appointment type
     
     // Convert form field names to match backend expectations
     formData.append('patientName', formData.get('patient-name'));

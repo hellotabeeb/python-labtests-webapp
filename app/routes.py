@@ -34,42 +34,15 @@ api_client = ApiClient(configuration)
 api_instance = TransactionalEmailsApi(api_client)
 
 
-# @main.route('/firebase-config')
-# def firebase_config():
-#     try:
-#         with open('app/serviceAccountKey.json') as f:
-#             config = json.load(f)
-#         firebase_config = {
-#             "apiKey": os.getenv('FIREBASE_API_KEY'),
-#             "authDomain": os.getenv('FIREBASE_AUTH_DOMAIN'),
-#             "projectId": config.get('project_id'),
-#             "storageBucket": os.getenv('FIREBASE_STORAGE_BUCKET'),
-#             "messagingSenderId": os.getenv('FIREBASE_MESSAGING_SENDER_ID'),
-#             "appId": os.getenv('FIREBASE_APP_ID'),
-#             "measurementId": os.getenv('FIREBASE_MEASUREMENT_ID')
-#         }
-#         return jsonify(firebase_config)
-#     except Exception as e:
-#         current_app.logger.error(f"Error fetching Firebase config: {e}")
-#         return jsonify({"error": "Failed to fetch Firebase config"}), 500
-
-
-
-# Initialize Firebase Admin SDK
-if not _apps:
-    service_account_info = json.loads(os.getenv('SERVICE_ACCOUNT_KEY'))
-    cred = credentials.Certificate(service_account_info)
-    initialize_app(cred)
-db = firestore.client()
-
 @main.route('/firebase-config')
 def firebase_config():
     try:
-        service_account_info = json.loads(os.getenv('SERVICE_ACCOUNT_KEY'))
+        with open('app/serviceAccountKey.json') as f:
+            config = json.load(f)
         firebase_config = {
             "apiKey": os.getenv('FIREBASE_API_KEY'),
             "authDomain": os.getenv('FIREBASE_AUTH_DOMAIN'),
-            "projectId": service_account_info.get('project_id'),
+            "projectId": config.get('project_id'),
             "storageBucket": os.getenv('FIREBASE_STORAGE_BUCKET'),
             "messagingSenderId": os.getenv('FIREBASE_MESSAGING_SENDER_ID'),
             "appId": os.getenv('FIREBASE_APP_ID'),
@@ -79,6 +52,33 @@ def firebase_config():
     except Exception as e:
         current_app.logger.error(f"Error fetching Firebase config: {e}")
         return jsonify({"error": "Failed to fetch Firebase config"}), 500
+
+
+
+# # Initialize Firebase Admin SDK
+# if not _apps:
+#     service_account_info = json.loads(os.getenv('SERVICE_ACCOUNT_KEY'))
+#     cred = credentials.Certificate(service_account_info)
+#     initialize_app(cred)
+# db = firestore.client()
+
+# @main.route('/firebase-config')
+# def firebase_config():
+#     try:
+#         service_account_info = json.loads(os.getenv('SERVICE_ACCOUNT_KEY'))
+#         firebase_config = {
+#             "apiKey": os.getenv('FIREBASE_API_KEY'),
+#             "authDomain": os.getenv('FIREBASE_AUTH_DOMAIN'),
+#             "projectId": service_account_info.get('project_id'),
+#             "storageBucket": os.getenv('FIREBASE_STORAGE_BUCKET'),
+#             "messagingSenderId": os.getenv('FIREBASE_MESSAGING_SENDER_ID'),
+#             "appId": os.getenv('FIREBASE_APP_ID'),
+#             "measurementId": os.getenv('FIREBASE_MEASUREMENT_ID')
+#         }
+#         return jsonify(firebase_config)
+#     except Exception as e:
+#         current_app.logger.error(f"Error fetching Firebase config: {e}")
+#         return jsonify({"error": "Failed to fetch Firebase config"}), 500
 
 @main.route('/')
 def index():
@@ -108,7 +108,8 @@ def book_appointment():
             'patientPhone': 'Patient Phone',
             'patientEmail': 'Patient Email',
             'appointmentDay': 'Appointment Day',
-            'appointmentTime': 'Appointment Time'
+            'appointmentTime': 'Appointment Time',
+            'appointmentType': 'Appointment Type'  # Add appointment type
         }
 
         # Check for missing required fields
@@ -119,8 +120,8 @@ def book_appointment():
         
         if missing_fields:
             return jsonify({
-                'success': False, 
-                'message': f'Missing required fields: {", ".join(missing_fields)}'
+                'success': False,
+                'message': f"Missing required fields: {', '.join(missing_fields)}"
             }), 400
 
         # Extract form data
@@ -133,6 +134,7 @@ def book_appointment():
         patient_email = data.get('patientEmail')
         appointment_day = data.get('appointmentDay')
         appointment_time = data.get('appointmentTime')
+        appointment_type = data.get('appointmentType')  # Extract appointment type
         patient_remarks = data.get('patientRemarks', '')  # Optional field
 
         # Handle file attachment
@@ -143,17 +145,15 @@ def book_appointment():
         if attachment:
             # Validate file type
             if attachment.mimetype not in ['image/jpeg', 'image/png', 'application/pdf']:
-                current_app.logger.error("Invalid file type. Only JPG, PNG, and PDF are allowed.")
                 return jsonify({
-                    'success': False, 
-                    'message': 'Invalid file type. Only JPG, PNG, and PDF are allowed.'
+                    'success': False,
+                    'message': 'Invalid file type. Only JPEG, PNG, and PDF are allowed.'
                 }), 400
 
             # Validate file size (10MB limit)
             if attachment.content_length > 10 * 1024 * 1024:
-                current_app.logger.error("File size exceeds 10MB limit.")
                 return jsonify({
-                    'success': False, 
+                    'success': False,
                     'message': 'File size exceeds 10MB limit.'
                 }), 400
 
@@ -199,6 +199,7 @@ def book_appointment():
                 <p><strong>Email:</strong> {patient_email}</p>
                 <p><strong>Preferred Day:</strong> {appointment_day}</p>
                 <p><strong>Preferred Time:</strong> {appointment_time}</p>
+                <p><strong>Appointment Type:</strong> {appointment_type}</p>  <!-- Add appointment type -->
                 <p><strong>Remarks:</strong> {patient_remarks}</p>
                 {f'<p><strong>Attachment:</strong> <a href="{attachment_url}">View Attachment</a></p>' if attachment_url else ''}
             </body>
@@ -235,6 +236,7 @@ def book_appointment():
                 <p><strong>Specialty:</strong> {doctor_specialty}</p>
                 <p><strong>Day:</strong> {appointment_day}</p>
                 <p><strong>Time:</strong> {appointment_time}</p>
+                <p><strong>Appointment Type:</strong> {appointment_type}</p>  <!-- Add appointment type -->
                 <p>If you need to make any changes to your appointment, please contact us at support@hellotabeeb.com or +92 335 1626806</p>
                 <p>Thank you for choosing HelloTabeeb!</p>
             </body>

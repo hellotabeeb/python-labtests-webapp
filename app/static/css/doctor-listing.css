@@ -152,10 +152,11 @@ hr {
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    gap: 10px; /* Add space between buttons */
 }
 
 .appointment-info .next-available {
-    font-size: 1.2rem;
+    font-size: 0.9rem;
     margin-top: 10px;
 }
 
@@ -168,6 +169,8 @@ hr {
     cursor: pointer;
     transition: background-color 0.3s;
     margin-bottom: 5px;
+    font-size: 0.8rem; /* Decrease font size */
+    width: 200px; /* Fix the width of the buttons */
 }
 
 .book-button:hover, .video-consult:hover {
