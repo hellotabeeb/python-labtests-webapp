@@ -80,7 +80,7 @@ def firebase_config():
         current_app.logger.error(f"Error fetching Firebase config: {e}")
         return jsonify({"error": "Failed to fetch Firebase config"}), 500
 
-@main.route('/')
+@main.route('/labtests')
 def index():
     return render_template('index.html')
 
