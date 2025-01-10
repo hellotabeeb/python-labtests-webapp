@@ -207,7 +207,7 @@ def book_appointment():
         """
 
         # Send email to admin
-        admin_email = "ahadnaseer47@gmail.com"
+        admin_email = "shahzad892@gmail.com"
         admin_send_smtp_email = SendSmtpEmail(
             to=[{
                 "email": admin_email,
