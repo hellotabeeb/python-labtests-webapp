@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HelloTabeeb - Doctor Registration</title>
+    <title>HelloTabeeb - Professional Registration</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/doctor_registration.css') }}">
 </head>
@@ -24,11 +24,33 @@
         <div class="description-section">
             <p class="description">
                 Join HelloTabeeb and connect with patients seamlessly. Our platform empowers healthcare professionals 
-                to expand their reach, manage appointments, and provide exceptional care through innovative digital solutions.
+                and other professionals to expand their reach, manage appointments, and provide exceptional service through innovative digital solutions.
             </p>
         </div>
 
-        <form id="doctor-registration-form" action="{{ url_for('main.register_doctor') }}" method="POST" enctype="multipart/form-data">
+        <!-- Profession selector -->
+        <div class="profession-selector-container">
+            <h2>Select Your Profession</h2>
+            <div class="profession-selector">
+                <label for="profession-type">Profession</label>
+                <select id="profession-type" name="profession-type" required>
+                    <option value="">-- Select Profession --</option>
+                    <option value="doctor">Medical Doctor</option>
+                    <option value="finance">Accounting & Finance</option>
+                    <option value="software">Software Engineer</option>
+                    <option value="computer-science">Computer Science</option>
+                    <option value="customer-service">Customer Service</option>
+                    <option value="marketing">Marketing Professional</option>
+                    <option value="hr">Human Resources</option>
+                    <option value="legal">Legal Professional</option>
+                    <option value="education">Education Professional</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Doctor Registration Form (Existing) -->
+        <form id="doctor-registration-form" action="{{ url_for('main.register_doctor') }}" method="POST" enctype="multipart/form-data" style="display: none;">
+            <input type="hidden" name="profession" value="doctor">
             <div class="form-grid">
                 <!-- Personal Information -->
                 <div class="form-section">
@@ -53,14 +75,12 @@
                 <div class="form-section">
                     <h2>Professional Details</h2>
 
-
                     <div class="input-group">
                       <label for="country">Country</label>
                       <select id="country" name="country" required>
                         <option value="">Select Country</option>
                         <option value="pakistan">Pakistan</option>
                         <hr style="border: 1px solid #ccc;" />
-
                         <option value="afghanistan">Afghanistan</option>
                         <option value="albania">Albania</option>
                         <option value="algeria">Algeria</option>
@@ -192,7 +212,6 @@
                         <option value="north macedonia">North Macedonia</option>
                         <option value="norway">Norway</option>
                         <option value="oman">Oman</option>
-                        
                         <option value="palau">Palau</option>
                         <option value="panama">Panama</option>
                         <option value="papua new guinea">Papua New Guinea</option>
@@ -259,7 +278,6 @@
                       </select>
                     </div>
                    
-
                     <!-- Dynamic License and ID fields -->
                     <div id="license-id-fields">
                         <div class="input-group" id="medical-license-group">
@@ -272,8 +290,6 @@
                             <input type="text" id="national-id" name="national-id" required>
                         </div>
                     </div>
-
-                   
 
                     <div class="input-group">
                         <label for="specialty">Specialty</label>
@@ -401,7 +417,7 @@
                     <div class="input-group">
                         <label for="doctor-image">Profile Picture</label>
                         <input type="file" id="doctor-image" name="doctor-image" accept="image/*" required>
-                        <small>Profile picture guidelines: Please attach a clinical background picture. This will be uploaded on our website so that patients can reach out to you for consultation.</small>
+                        <small>Profile picture guidelines: Please attach a clinical background picture. Maximum size: 5MB</small>
                     </div>
                 </div>
             </div>
@@ -409,6 +425,120 @@
             <div class="input-group resume-upload">
                 <label for="doctor-resume">Upload Resume (PDF/DOCX)</label>
                 <input type="file" id="doctor-resume" name="doctor-resume" accept=".pdf,.doc,.docx" required>
+                <small>Maximum file size: 5MB</small>
+            </div>
+
+            <div class="submit-section">
+                <button type="submit" class="btn-submit">Complete Registration</button>
+            </div>
+        </form>
+
+        <!-- Generic Professional Registration Form (New) -->
+        <form id="professional-registration-form" action="{{ url_for('main.register_professional') }}" method="POST" enctype="multipart/form-data" style="display: none;">
+            <input type="hidden" id="profession-field" name="profession" value="">
+            <div class="form-grid-professional">
+                <!-- Personal Information -->
+                <div class="form-section">
+                    <h2>Personal Information</h2>
+                    <div class="input-group">
+                        <label for="pro-full-name">Full Name</label>
+                        <input type="text" id="pro-full-name" name="full-name" required>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="pro-email">Email Address</label>
+                        <input type="email" id="pro-email" name="email" required>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="pro-phone-number">Phone Number</label>
+                        <input type="tel" id="pro-phone-number" name="phone-number" required>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="pro-country">Country</label>
+                        <select id="pro-country" name="country" required>
+                            <option value="">Select Country</option>
+                            <option value="pakistan">Pakistan</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="pro-city">City</label>
+                        <input type="text" id="pro-city" name="city" required>
+                    </div>
+                </div>
+
+                <!-- Professional Information -->
+                <div class="form-section">
+                    <h2>Professional Details</h2>
+
+                    <div class="input-group">
+                        <label for="pro-education">Highest Education Level</label>
+                        <select id="pro-education" name="education" required>
+                            <option value="">Select Education Level</option>
+                            <option value="bachelors">Bachelor's Degree</option>
+                            <option value="masters">Master's Degree</option>
+                            <option value="phd">Ph.D.</option>
+                            <option value="diploma">Diploma</option>
+                            <option value="certificate">Professional Certification</option>
+                            <option value="highschool">High School</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="pro-experience">Years of Experience</label>
+                        <input type="number" id="pro-experience" name="experience" min="0" max="50" required>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="pro-skills">Key Skills</label>
+                        <textarea id="pro-skills" name="skills" rows="3" placeholder="Enter your key skills separated by commas" required></textarea>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="pro-languages">Languages</label>
+                        <input type="text" id="pro-languages" name="languages" placeholder="e.g., English, Urdu, Punjabi" required>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="pro-expected-salary">Expected Salary (PKR)</label>
+                        <input type="number" id="pro-expected-salary" name="expected-salary" required>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h2>Additional Information</h2>
+                    
+                    <div class="input-group">
+                        <label for="pro-profile-picture">Profile Picture</label>
+                        <input type="file" id="pro-profile-picture" name="profile-picture" accept="image/*" required>
+                        <small>Maximum size: 5MB</small>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="pro-resume">Upload Resume/CV (PDF/DOCX)</label>
+                        <input type="file" id="pro-resume" name="resume" accept=".pdf,.doc,.docx" required>
+                        <small>Maximum size: 5MB</small>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="pro-bio">Professional Bio</label>
+                        <textarea id="pro-bio" name="bio" rows="4" placeholder="Brief description of your professional background"></textarea>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="pro-availability">Availability</label>
+                        <select id="pro-availability" name="availability" required>
+                            <option value="">Select Availability</option>
+                            <option value="immediate">Immediate</option>
+                            <option value="two-weeks">Two Weeks Notice</option>
+                            <option value="one-month">One Month Notice</option>
+                            <option value="more-than-one-month">More Than One Month</option>
+                        </select>
+                    </div>
+                </div>
             </div>
 
             <div class="submit-section">
