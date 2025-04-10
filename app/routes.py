@@ -7,7 +7,6 @@ from firebase_admin import firestore
 from . import db
 from firebase_admin import credentials, storage
 from werkzeug.utils import secure_filename
-import dropbox
 import os
 import mimetypes
 from googleapiclient.http import MediaFileUpload
@@ -33,35 +32,6 @@ configuration.api_key['api-key'] = os.getenv('BREVO_API_KEY')
 api_client = ApiClient(configuration)
 api_instance = TransactionalEmailsApi(api_client)
 
-
-# @main.route('/firebase-config')
-# def firebase_config():
-#     try:
-#         with open('app/serviceAccountKey.json') as f:
-#             config = json.load(f)
-#         firebase_config = {
-#             "apiKey": os.getenv('FIREBASE_API_KEY'),
-#             "authDomain": os.getenv('FIREBASE_AUTH_DOMAIN'),
-#             "projectId": config.get('project_id'),
-#             "storageBucket": os.getenv('FIREBASE_STORAGE_BUCKET'),
-#             "messagingSenderId": os.getenv('FIREBASE_MESSAGING_SENDER_ID'),
-#             "appId": os.getenv('FIREBASE_APP_ID'),
-#             "measurementId": os.getenv('FIREBASE_MEASUREMENT_ID')
-#         }
-#         return jsonify(firebase_config)
-#     except Exception as e:
-#         current_app.logger.error(f"Error fetching Firebase config: {e}")
-#         return jsonify({"error": "Failed to fetch Firebase config"}), 500
-
-
-
-# Initialize Firebase Admin SDK
-if not _apps:
-    service_account_info = json.loads(os.getenv('SERVICE_ACCOUNT_KEY'))
-    cred = credentials.Certificate(service_account_info)
-    initialize_app(cred)
-db = firestore.client()
-
 @main.route('/firebase-config')
 def firebase_config():
     try:
@@ -79,6 +49,27 @@ def firebase_config():
     except Exception as e:
         current_app.logger.error(f"Error fetching Firebase config: {e}")
         return jsonify({"error": "Failed to fetch Firebase config"}), 500
+
+        # @main.route('/firebase-config')
+        # def firebase_config():
+        #     try:
+        #         with open('app/serviceAccountKey.json') as f:
+        #             config = json.load(f)
+        #         firebase_config = {
+        #             "apiKey": os.getenv('FIREBASE_API_KEY'),
+        #             "authDomain": os.getenv('FIREBASE_AUTH_DOMAIN'),
+        #             "projectId": config.get('project_id'),
+        #             "storageBucket": os.getenv('FIREBASE_STORAGE_BUCKET'),
+        #             "messagingSenderId": os.getenv('FIREBASE_MESSAGING_SENDER_ID'),
+        #             "appId": os.getenv('FIREBASE_APP_ID'),
+        #             "measurementId": os.getenv('FIREBASE_MEASUREMENT_ID')
+        #         }
+        #         return jsonify(firebase_config)
+        #     except Exception as e:
+        #         current_app.logger.error(f"Error fetching Firebase config: {e}")
+        #         return jsonify({"error": "Failed to fetch Firebase config"}), 500
+
+
 
 @main.route('/')
 def index():
@@ -460,10 +451,6 @@ def validation():
 def card():
     return render_template('card.html')
 
-
-# Initialize Dropbox client
-DROPBOX_ACCESS_TOKEN = os.getenv('DROPBOX_ACCESS_TOKEN')
-dropbox_client = dropbox.Dropbox(DROPBOX_ACCESS_TOKEN)
 
 @main.route('/join')
 def doctor_registration():
@@ -1132,6 +1119,182 @@ def register_doctor():
         return jsonify({"success": False, "message": "Failed to register doctor."}), 500
 
 
+@main.route('/register-professional', methods=['POST'])
+def register_professional():
+    try:
+        data = request.form.to_dict()
+        logger = logging.getLogger(__name__)
+        logger.info(f"Received professional registration data: {data}")
+
+        # Handle file uploads
+        profile_picture = request.files['profile-picture']
+        resume = request.files['resume']
+
+        if profile_picture and resume:
+            # File handling functions
+            def create_folder(folder_name, parent_id=None):
+                file_metadata = {
+                    'name': folder_name,
+                    'mimeType': 'application/vnd.google-apps.folder'
+                }
+                if parent_id:
+                    file_metadata['parents'] = [parent_id]
+                folder = drive_service.files().create(body=file_metadata, fields='id').execute()
+                return folder.get('id')
+
+            def upload_to_drive(file, filename, folder_id=None):
+                mime_type, _ = mimetypes.guess_type(filename)
+                media = MediaIoBaseUpload(file, mimetype=mime_type)
+                file_metadata = {'name': filename}
+                if folder_id:
+                    file_metadata['parents'] = [folder_id]
+                file = drive_service.files().create(body=file_metadata, media_body=media, fields='id, webViewLink').execute()
+                
+                drive_service.permissions().create(
+                    fileId=file.get('id'),
+                    body={'type': 'anyone', 'role': 'reader'}
+                ).execute()
+                
+                return file.get('webViewLink')
+
+            # Folder creation and file upload logic
+            parent_folder_name = 'professionals'
+            parent_folder_id = None
+
+            query = f"name='{parent_folder_name}' and mimeType='application/vnd.google-apps.folder' and trashed=false"
+            response = drive_service.files().list(q=query, spaces='drive', fields='files(id, name)').execute()
+            files = response.get('files', [])
+
+            parent_folder_id = files[0]['id'] if files else create_folder(parent_folder_name)
+            
+            # Create subfolder based on profession
+            profession_folder_id = create_folder(data['profession'], parent_id=parent_folder_id)
+            email_folder_id = create_folder(data['email'], parent_id=profession_folder_id)
+
+            # Upload files
+            image_link = upload_to_drive(profile_picture.stream, secure_filename(profile_picture.filename), folder_id=email_folder_id)
+            resume_link = upload_to_drive(resume.stream, secure_filename(resume.filename), folder_id=email_folder_id)
+
+            data['profile_picture_url'] = image_link
+            data['resume_url'] = resume_link
+            data['timestamp'] = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
+
+            # Save to Firestore
+            doc_ref = db.collection('professionalRegistration').document(data['email'])
+            doc_ref.set(data)
+
+            sender = {"name": "HelloTabeeb", "email": "support@hellotabeeb.com"}
+
+            # Send email to admin
+            try:
+                # Format profession name for display
+                profession_display = {
+                    'finance': 'Accounting & Finance',
+                    'software': 'Software Engineer',
+                    'computer-science': 'Computer Science',
+                    'customer-service': 'Customer Service',
+                    'marketing': 'Marketing',
+                    'hr': 'Human Resources',
+                    'legal': 'Legal Professional',
+                    'education': 'Education Professional'
+                }.get(data['profession'], data['profession'].title())
+                
+                admin_html_content = f"""
+                <html>
+                    <body>
+                        <h2>New Professional Registration</h2>
+                        <h3>Personal Information</h3>
+                        <p><strong>Profession:</strong> {profession_display}</p>
+                        <p><strong>Full Name:</strong> {data['full-name']}</p>
+                        <p><strong>Email:</strong> {data['email']}</p>
+                        <p><strong>Phone Number:</strong> {data['phone-number']}</p>
+                        <p><strong>Country:</strong> {data['country'].title()}</p>
+                        <p><strong>City:</strong> {data['city']}</p>
+                        
+                        <h3>Professional Details</h3>
+                        <p><strong>Education:</strong> {data.get('education', 'N/A')}</p>
+                        <p><strong>Years of Experience:</strong> {data.get('experience', 'N/A')}</p>
+                        <p><strong>Key Skills:</strong> {data.get('skills', 'N/A')}</p>
+                        <p><strong>Languages:</strong> {data.get('languages', 'N/A')}</p>
+                        <p><strong>Expected Salary:</strong> {data.get('expected-salary', 'N/A')} PKR</p>
+                        <p><strong>Availability:</strong> {data.get('availability', 'N/A')}</p>
+                        <p><strong>Bio:</strong> {data.get('bio', 'N/A')}</p>
+                        
+                        <h3>Uploaded Documents</h3>
+                        <p><strong>Profile Picture:</strong> <a href="{data.get('profile_picture_url', '#')}">View Image</a></p>
+                        <p><strong>Resume:</strong> <a href="{data.get('resume_url', '#')}">View Resume</a></p>
+                        
+                        <p><strong>Registration Timestamp:</strong> {data['timestamp']}</p>
+                    </body>
+                </html>
+                """
+
+                admin_email = SendSmtpEmail(
+                    to=[{"email": "shahzad892@gmail.com"}],
+                    sender=sender,
+                    subject=f"New Professional Registration - {profession_display}",
+                    html_content=admin_html_content
+                )
+                api_instance.send_transac_email(admin_email)
+
+                # Send welcome email to professional
+                professional_html_content = f"""
+                <html>
+                    <body>
+                        <h2>Thank You for Joining HelloTabeeb!</h2>
+                        
+                        <p>Dear {data['full-name']},</p>
+                        
+                        <p>We are thrilled to welcome you to HelloTabeeb, Pakistan's leading platform connecting professionals like you with opportunities. Thank you for signing up and becoming part of our community.</p>
+                        
+                        <p>At HelloTabeeb, we are committed to empowering professionals by:</p>
+                        <ul>
+                            <li>Offering a robust platform for professional growth.</li>
+                            <li>Enhancing your visibility through our network.</li>
+                            <li>Helping you connect with opportunities in your field.</li>
+                        </ul>
+                        
+                        <p>For more information about HelloTabeeb, visit our:</p>
+                        <ul>
+                            <li>Website: <a href="https://www.hellotabeeb.com">www.hellotabeeb.com</a></li>
+                            <li>Facebook: <a href="https://www.facebook.com/hellotabeeb">www.facebook.com/hellotabeeb</a></li>
+                            <li>YouTube: <a href="https://www.youtube.com/@hellotabeeb">www.youtube.com/@hellotabeeb</a></li>
+                        </ul>
+                        
+                        <p>If you have any questions, feel free to reach out to our helpline at 0337-4373334.</p>
+                        
+                        <p>We're excited about the journey ahead and the positive impact we can create together. Thank you for being a part of HelloTabeeb!</p>
+                        
+                        <p>Warm regards,<br>
+                        Team HelloTabeeb<br>
+                        <a href="https://www.hellotabeeb.com">www.hellotabeeb.com</a><br>
+                        Helpline: 0337-4373334</p>
+                    </body>
+                </html>
+                """
+
+                professional_email = SendSmtpEmail(
+                    to=[{"email": data['email']}],
+                    sender=sender,
+                    subject="Thank You for Joining HelloTabeeb!",
+                    html_content=professional_html_content
+                )
+                api_instance.send_transac_email(professional_email)
+                
+                logger.info(f"Emails sent successfully to admin and professional {data['email']}")
+
+            except ApiException as e:
+                logger.error(f"Brevo API Exception when sending emails: {e}")
+            except Exception as e:
+                logger.error(f"Unexpected error when sending emails: {e}")
+
+            return jsonify({"success": True, "message": "Registration successful."}), 200
+        else:
+            return jsonify({"success": False, "message": "File upload failed."}), 400
+    except Exception as e:
+        logger.error(f"Error registering professional: {e}")
+        return jsonify({"success": False, "message": "Failed to complete registration."}), 500
+
 
 @main.route('/book', methods=['POST'])
 def book():
@@ -1328,7 +1491,6 @@ def get_tests():
     except Exception as e:
         logger.error(f"Error fetching tests: {e}")
         return jsonify([])
-    
-    
 
-   
+
+
