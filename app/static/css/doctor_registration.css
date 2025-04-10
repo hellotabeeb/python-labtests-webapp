@@ -181,6 +181,79 @@ input:focus, select:focus {
     100% { transform: rotate(360deg); }
 }
 
+/* Profession Selector Styles */
+.profession-selector-container {
+    background-color: var(--white);
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    padding: 25px;
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+.profession-selector-container h2 {
+    color: var(--primary-color);
+    font-size: 20px;
+    margin-bottom: 15px;
+}
+
+.profession-selector {
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.profession-selector select {
+    font-size: 16px;
+    padding: 12px;
+    border-radius: 8px;
+    border: 2px solid var(--primary-color);
+    background-color: #f8f9fa;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.profession-selector select:hover {
+    background-color: #e9ecef;
+}
+
+.profession-selector select:focus {
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.3);
+    outline: none;
+}
+
+/* Professional Form Grid */
+.form-grid-professional {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+}
+
+/* Textarea Styles */
+textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.3s ease;
+    resize: vertical;
+    min-height: 80px;
+}
+
+textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+/* Small field info */
+small {
+    display: block;
+    margin-top: 5px;
+    font-size: 12px;
+    color: var(--secondary-color);
+}
 
 /* Tablet Styles (768px - 1024px) */
 @media screen and (max-width: 1024px) {
@@ -217,6 +290,10 @@ input:focus, select:focus {
     .btn-submit {
         padding: 12px 35px;
         font-size: 15px;
+    }
+
+    .form-grid-professional {
+        grid-template-columns: repeat(2, 1fr);
     }
 }
 
@@ -268,6 +345,16 @@ input:focus, select:focus {
 
     label {
         font-size: 14px;
+    }
+
+    .profession-selector select {
+        width: 100%;
+        font-size: 14px;
+        padding: 10px;
+    }
+    
+    .form-grid-professional {
+        grid-template-columns: 1fr;
     }
 }
 
