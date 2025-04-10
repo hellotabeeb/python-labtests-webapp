@@ -9,6 +9,7 @@ from googleapiclient.discovery import build
 db = None
 drive_service = None
 
+
 def create_drive_service():
     """
     Initializes the Google Drive service client using credentials.
@@ -45,6 +46,34 @@ def create_drive_service():
         return service
     except Exception as e:
         raise ValueError(f"Failed to initialize Google Drive service: {str(e)}")
+
+
+# def create_drive_service():
+#     """
+#     Initializes the Google Drive service client using credentials.
+#     """
+#     try:
+#         # Use local credentials file directly
+#         credentials_path = os.path.join(
+#             os.path.dirname(os.path.abspath(__file__)), 
+#             'serviceAccountKey.json'
+#         )
+#         if not os.path.exists(credentials_path):
+#             raise FileNotFoundError(
+#                 "Google Drive credentials not found. "
+#                 "Ensure that googledrivecredentials.json file exists in the application directory."
+#             )
+        
+#         credentials = service_account.Credentials.from_service_account_file(
+#             credentials_path,
+#             scopes=['https://www.googleapis.com/auth/drive']
+#         )
+        
+#         # Initialize the Google Drive service
+#         service = build('drive', 'v3', credentials=credentials)
+#         return service
+#     except Exception as e:
+#         raise ValueError(f"Failed to initialize Google Drive service: {str(e)}")
 
 def create_app():
     """
