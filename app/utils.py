@@ -20,6 +20,8 @@ configuration = Configuration()
 
 configuration.api_key['api-key'] = os.getenv('BREVO_API_KEY')
 
+# Replace line 19 with:
+
 if not configuration.api_key['api-key']:
     logger.error("Brevo API key not found in environment variables.")
     raise ValueError("Brevo API key is missing.")
