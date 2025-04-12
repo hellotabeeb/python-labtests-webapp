@@ -12,6 +12,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const resumeInput = document.getElementById('doctor-resume');
     const proImageInput = document.getElementById('pro-profile-picture');
     const proResumeInput = document.getElementById('pro-resume');
+    const proCountrySelect = document.getElementById('pro-country');
+    const proCNICGroup = document.getElementById('pro-cnic-group');
 
     const countrySelect = document.getElementById('country');
     const medicalLicenseGroup = document.getElementById('medical-license-group');
@@ -2015,6 +2017,24 @@ document.addEventListener('DOMContentLoaded', function() {
             // Hide fields if no country is selected
             medicalLicenseGroup.style.display = 'none';
             nationalIdGroup.style.display = 'none';
+        }
+    });
+
+    // Add event listener for pro-country
+    proCountrySelect.addEventListener('change', function() {
+        const selectedCountry = this.value;
+        const proCNICInput = document.getElementById('pro-cnic');
+        
+        if (selectedCountry === 'pakistan') {
+            proCNICGroup.style.display = 'block';
+            proCNICInput.required = true;
+            proCNICInput.placeholder = 'Enter without dashes (e.g., 3520212345678)';
+            proCNICInput.previousElementSibling.textContent = 'CNIC Number';
+        } else {
+            proCNICGroup.style.display = 'block';
+            proCNICInput.required = true;
+            proCNICInput.placeholder = 'Enter national ID number';
+            proCNICInput.previousElementSibling.textContent = 'National ID Number';
         }
     });
 
