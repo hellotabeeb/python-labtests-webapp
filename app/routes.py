@@ -28,7 +28,10 @@ main = Blueprint('main', __name__)
 
 # Brevo Configuration
 configuration = Configuration()
+
 configuration.api_key['api-key'] = os.getenv('BREVO_API_KEY')
+
+
 api_client = ApiClient(configuration)
 api_instance = TransactionalEmailsApi(api_client)
 
@@ -50,24 +53,26 @@ def firebase_config():
         current_app.logger.error(f"Error fetching Firebase config: {e}")
         return jsonify({"error": "Failed to fetch Firebase config"}), 500
 
-        # @main.route('/firebase-config')
-        # def firebase_config():
-        #     try:
-        #         with open('app/serviceAccountKey.json') as f:
-        #             config = json.load(f)
-        #         firebase_config = {
-        #             "apiKey": os.getenv('FIREBASE_API_KEY'),
-        #             "authDomain": os.getenv('FIREBASE_AUTH_DOMAIN'),
-        #             "projectId": config.get('project_id'),
-        #             "storageBucket": os.getenv('FIREBASE_STORAGE_BUCKET'),
-        #             "messagingSenderId": os.getenv('FIREBASE_MESSAGING_SENDER_ID'),
-        #             "appId": os.getenv('FIREBASE_APP_ID'),
-        #             "measurementId": os.getenv('FIREBASE_MEASUREMENT_ID')
-        #         }
-        #         return jsonify(firebase_config)
-        #     except Exception as e:
-        #         current_app.logger.error(f"Error fetching Firebase config: {e}")
-        #         return jsonify({"error": "Failed to fetch Firebase config"}), 500
+# @main.route('/firebase-config')
+# def firebase_config():
+#     try:
+#         with open('app/serviceAccountKey.json') as f:
+#             config = json.load(f)
+#         firebase_config = {
+#             "apiKey": os.getenv('FIREBASE_API_KEY'),
+#             "authDomain": os.getenv('FIREBASE_AUTH_DOMAIN'),
+#             "projectId": config.get('project_id'),
+#             "storageBucket": os.getenv('FIREBASE_STORAGE_BUCKET'),
+#             "messagingSenderId": os.getenv('FIREBASE_MESSAGING_SENDER_ID'),
+#             "appId": os.getenv('FIREBASE_APP_ID'),
+#             "measurementId": os.getenv('FIREBASE_MEASUREMENT_ID')
+#         }
+#         return jsonify(firebase_config)
+#     except Exception as e:
+#         current_app.logger.error(f"Error fetching Firebase config: {e}")
+#         return jsonify({"error": "Failed to fetch Firebase config"}), 500
+
+
 
 
 
@@ -1209,6 +1214,7 @@ def register_professional():
                         <p><strong>Email:</strong> {data['email']}</p>
                         <p><strong>Phone Number:</strong> {data['phone-number']}</p>
                         <p><strong>Country:</strong> {data['country'].title()}</p>
+                        <p><strong>CNIC/ID Number:</strong> {data.get('cnic', 'N/A')}</p>
                         <p><strong>City:</strong> {data['city']}</p>
                         
                         <h3>Professional Details</h3>
