@@ -53,9 +53,9 @@ def move_code_to_availed(name, phone, email, selected_tests, discount_type=None)
 
         # Select the appropriate codes collection based on discount type
         if discount_type == '30':
-            # Use codes11 collection for 30% discount
-            codes_ref = db.collection('codes11')
-            logger.info("Using codes11 collection for 30% discount")
+            # Use codes30 collection for 30% discount (changed from codes11)
+            codes_ref = db.collection('codes30')
+            logger.info("Using codes30 collection for 30% discount")
         else:
             # Use default codes collection
             codes_ref = db.collection('codes')
