@@ -1331,7 +1331,7 @@ def book():
         
         # Logic for different labs
         if lab == 'chughtai-lab':
-            code, tests_details = move_code_to_availed(name, phone, email, selected_tests)
+            code, tests_details = move_code_to_availed(name, phone, email, selected_tests, discount_type)
             if not code:
                 flash('No available booking codes found.', 'error')
                 return redirect(url_for('main.index'))
