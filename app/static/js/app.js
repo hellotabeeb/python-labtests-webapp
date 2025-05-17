@@ -23,7 +23,6 @@ document.addEventListener('DOMContentLoaded', function() {
     let selectedDiscounts = new Set(); // To store selected discount filters
 
 
-    // Add this to your filter button click handlers
 document.querySelectorAll('.filter-button').forEach(button => {
     button.addEventListener('click', function() {
         const discountValue = this.dataset.discount;
