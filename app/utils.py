@@ -47,16 +47,24 @@ def fetch_tests():
         logger.error(f"Error fetching tests: {e}")
         return []
 
-def move_code_to_availed(name, phone, email, selected_tests):
+def move_code_to_availed(name, phone, email, selected_tests, discount_type=None):
     try:
-        logger.info(f"Assigning booking code for user: {email}")
+        logger.info(f"Assigning booking code for user: {email} with discount type: {discount_type}")
 
-        # Access the top-level 'codes' collection
-        codes_ref = db.collection('codes')
+        # Select the appropriate codes collection based on discount type
+        if discount_type == '30':
+            # Use codes11 collection for 30% discount
+            codes_ref = db.collection('codes11')
+            logger.info("Using codes11 collection for 30% discount")
+        else:
+            # Use default codes collection
+            codes_ref = db.collection('codes')
+            logger.info("Using default codes collection")
+
         code_docs = codes_ref.where('isUsed', '==', 'false').limit(1).get()
 
         if not code_docs:
-            logger.warning("No available booking codes found.")
+            logger.warning(f"No available booking codes found in collection: {'codes11' if discount_type == '30' else 'codes'}")
             return None, []
 
         code_doc = code_docs[0]
@@ -69,9 +77,9 @@ def move_code_to_availed(name, phone, email, selected_tests):
 
         logger.info(f"Fetched code: {code}")
 
-        # Delete the code document from 'codes'
+        # Delete the code document from the appropriate collection
         codes_ref.document(code_doc.id).delete()
-        logger.info(f"Deleted code {code} from 'codes' collection.")
+        logger.info(f"Deleted code {code} from collection.")
 
         # Define discount percentage based on lab
         DISCOUNT_PERCENTAGE = 10  # Default discount
