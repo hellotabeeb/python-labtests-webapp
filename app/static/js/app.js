@@ -33,18 +33,21 @@ document.querySelectorAll('.filter-button').forEach(button => {
 
 
 
-    infoIcon.addEventListener('click', () => {
-        infoPopup.style.display = 'block';
-    });
+// Temporarily disabled 12% discount popup functionality
+/*
+infoIcon.addEventListener('click', () => {
+    infoPopup.style.display = 'block';
+});
 
-    closePopup.addEventListener('click', () => {
+closePopup.addEventListener('click', () => {
+    infoPopup.style.display = 'none';
+});
+window.addEventListener('click', (e) => {
+    if (e.target === infoPopup) {
         infoPopup.style.display = 'none';
-    });
-    window.addEventListener('click', (e) => {
-        if (e.target === infoPopup) {
-            infoPopup.style.display = 'none';
-        }
-    });
+    }
+});
+*/
     
     // Lab-specific discount configurations
     const labDiscountConfigs = {
