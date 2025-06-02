@@ -47,71 +47,128 @@ def fetch_tests():
         logger.error(f"Error fetching tests: {e}")
         return []
 
-def move_code_to_availed(name, phone, email, selected_tests, discount_type=None):
+def move_code_to_availed(name, phone, email, selected_tests, discount_type=None, lab=None):
     try:
         logger.info(f"Assigning booking code for user: {email} with discount type: {discount_type}")
 
-        # Select the appropriate codes collection based on discount type
-        if discount_type == '30':
-            # Use codes30 collection for 30% discount (changed from codes11)
-            codes_ref = db.collection('codes30')
-            logger.info("Using codes30 collection for 30% discount")
+        # Lab-specific configurations
+        lab_configs = {
+            'chughtai-lab': {
+                'collection_path': 'labs/chughtaiLab/tests',
+                'default_discount': 20,
+                'high_discount_tests': ["Lipid Profile", "Serum 25-OH Vitamin D", "Glycosylated Hemoglobin (HbA1c)"],
+                'high_discount_percentage': 30,
+                'uses_dynamic_codes': True,  # Uses codes from database
+                'fixed_code': None
+            },
+            'idc-islamabad': {
+                'collection_path': 'labs/IDC/tests',
+                'default_discount': 10,
+                'high_discount_tests': [],
+                'high_discount_percentage': 10,
+                'uses_dynamic_codes': False,  # Uses fixed code
+                'fixed_code': 'IDC'
+            },
+            'dr-essa-lab': {
+                'collection_path': 'labs/essa/tests',
+                'default_discount': 20,
+                'high_discount_tests': [],
+                'high_discount_percentage': 20,
+                'uses_dynamic_codes': False,
+                'fixed_code': 'hellotabib'
+            },
+            'another-lab': {
+                'collection_path': 'labs/excel/tests',
+                'default_discount': 15,
+                'high_discount_tests': [],
+                'high_discount_percentage': 15,
+                'uses_dynamic_codes': False,
+                'fixed_code': 'HTB'
+            }
+        }
+
+        # Get lab configuration
+        lab_config = lab_configs.get(lab, lab_configs['chughtai-lab'])
+        
+        # Handle code assignment based on lab type
+        if lab_config['uses_dynamic_codes']:
+            # For Chughtai Lab - use existing code system
+            if discount_type == '30':
+                codes_ref = db.collection('codes30')
+                logger.info("Using codes30 collection for 30% discount")
+            else:
+                codes_ref = db.collection('codes')
+                logger.info("Using default codes collection")
+
+            code_docs = codes_ref.where('isUsed', '==', 'false').limit(1).get()
+
+            if not code_docs:
+                logger.warning(f"No available booking codes found in collection: {'codes30' if discount_type == '30' else 'codes'}")
+                return None, []
+
+            code_doc = code_docs[0]
+            code_data = code_doc.to_dict()
+            code = code_data.get('code')
+
+            if not code:
+                logger.error(f"Code field missing in document ID: {code_doc.id}")
+                return None, []
+
+            # Delete the code document
+            codes_ref.document(code_doc.id).delete()
+            logger.info(f"Deleted code {code} from collection.")
         else:
-            # Use default codes collection
-            codes_ref = db.collection('codes')
-            logger.info("Using default codes collection")
-
-        code_docs = codes_ref.where('isUsed', '==', 'false').limit(1).get()
-
-        if not code_docs:
-            logger.warning(f"No available booking codes found in collection: {'codes30' if discount_type == '30' else 'codes'}")
-            return None, []
-
-        code_doc = code_docs[0]
-        code_data = code_doc.to_dict()
-        code = code_data.get('code')
-
-        if not code:
-            logger.error(f"Code field missing in document ID: {code_doc.id}")
-            return None, []
-
-        logger.info(f"Fetched code: {code}")
-
-        # Delete the code document from the appropriate collection
-        codes_ref.document(code_doc.id).delete()
-        logger.info(f"Deleted code {code} from collection.")
-
-        # Define discount percentage based on lab
-        DISCOUNT_PERCENTAGE = 10  # Default discount
-        if 'essaLab' in selected_tests:
-            DISCOUNT_PERCENTAGE = 20
-        elif 'excelLab' in selected_tests:
-            DISCOUNT_PERCENTAGE = 15
-
-        # Fetch selected test details
+            # For other labs - use fixed code
+            code = lab_config['fixed_code']
+            logger.info(f"Using fixed code: {code} for lab: {lab}")
+        
+        # Fetch selected test details from correct collection
         tests_details = []
-        tests_ref = db.collection('labs').document('chughtaiLab').collection('tests')
+        collection_path = lab_config['collection_path']
+        
+        # Parse collection path
+        if '/' in collection_path:
+            parts = collection_path.split('/')
+            tests_ref = db.collection(parts[0]).document(parts[1]).collection(parts[2])
+        else:
+            tests_ref = db.collection(collection_path)
+        
         for test_id in selected_tests:
             test_doc = tests_ref.document(test_id).get()
             if test_doc.exists:
                 test_data = test_doc.to_dict()
+                test_name = test_data.get('Name', 'N/A')
                 original_fee = float(test_data.get('Fees', '0.00'))
-                discounted_fee = original_fee * (1 - DISCOUNT_PERCENTAGE / 100)
+                
+                # Apply correct discount based on test and lab
+                if test_name in lab_config['high_discount_tests']:
+                    discount_percentage = lab_config['high_discount_percentage']
+                else:
+                    discount_percentage = lab_config['default_discount']
+                
+                discounted_fee = original_fee * (1 - discount_percentage / 100)
+                
                 tests_details.append({
-                    'name': test_data.get('Name', 'N/A'),
+                    'name': test_name,
                     'original_fee': f"Rs.{original_fee:.2f}",
                     'discounted_fee': f"Rs.{discounted_fee:.2f}"
                 })
-                logger.info(f"Fetched test: {test_data.get('Name', 'N/A')}")
+                logger.info(f"Fetched test: {test_name} - Original: Rs.{original_fee:.2f}, Discounted: Rs.{discounted_fee:.2f}")
             else:
                 logger.warning(f"Test ID {test_id} not found.")
 
-        # Get the current month and year
+        # Save to availedCodes collection (same for all labs)
         current_month = datetime.utcnow().strftime('%m-%Y')
-
-        # Add to 'availedCodes' collection under the current month
         availed_ref = db.collection('availedCodes').document(current_month).collection('details')
-        availed_ref.document(code).set({
+        
+        # For labs with fixed codes, use a unique identifier
+        if not lab_config['uses_dynamic_codes']:
+            # Create unique document ID for fixed codes
+            unique_code_id = f"{code}_{datetime.utcnow().strftime('%Y%m%d%H%M%S')}_{email.replace('@', '_').replace('.', '_')}"
+        else:
+            unique_code_id = code
+            
+        availed_ref.document(unique_code_id).set({
             'availableAt': datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'),
             'code': code,
             'testFee': ', '.join([test['original_fee'] for test in tests_details]),
@@ -119,7 +176,8 @@ def move_code_to_availed(name, phone, email, selected_tests, discount_type=None)
             'testName': ', '.join([test['name'] for test in tests_details]),
             'userEmail': email,
             'userName': name,
-            'userPhone': phone
+            'userPhone': phone,
+            'lab': lab
         })
         logger.info(f"Moved code {code} to 'availedCodes/{current_month}/details' for user {email}.")
 
