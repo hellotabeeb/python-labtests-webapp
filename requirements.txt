@@ -24,7 +24,7 @@ google-generativeai==0.8.2
 google-resumable-media==2.7.2
 googleapis-common-protos==1.70.0
 grpcio==1.74.0
-grpcio-status==1.74.0
+grpcio-status==1.66.2
 httplib2==0.30.0
 idna==3.10
 itsdangerous==2.2.0
@@ -34,7 +34,7 @@ MarkupSafe==3.0.2
 msgpack==1.1.1
 pillow==11.3.0
 proto-plus==1.26.1
-protobuf==6.32.0
+protobuf==5.28.3
 pyasn1==0.6.1
 pyasn1_modules==0.4.2
 pycparser==2.22
