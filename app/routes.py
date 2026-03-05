@@ -462,6 +462,11 @@ def doctor_registration():
     return render_template('doctor_registration.html')
 
 
+@main.route('/privacy-policy')
+def privacy_policy():
+    return render_template('privacy_policy.html')
+
+
 @main.route('/home-sampling', methods=['GET', 'POST'])
 def home_sampling():
     if request.method == 'POST':
