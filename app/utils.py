@@ -103,6 +103,10 @@ def move_code_to_availed(name, phone, email, selected_tests, discount_type=None,
             code_docs = codes_ref.where('isUsed', '==', 'false').limit(1).get()
 
             if not code_docs:
+                # Support boolean 'False' in case documents were added manually with a boolean type
+                code_docs = codes_ref.where('isUsed', '==', False).limit(1).get()
+
+            if not code_docs:
                 logger.warning(f"No available booking codes found in collection: {'codes30' if discount_type == '30' else 'codes'}")
                 return None, []
 
