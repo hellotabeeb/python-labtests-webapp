@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let selectedTests = new Set();  // Store selected test IDs
     let totalAmount = 0;
     let selectedDiscounts = new Set(); // To store selected discount filters
+    let isLoading = false; // Track loading state to prevent race conditions
 
 
 document.querySelectorAll('.filter-button').forEach(button => {
@@ -86,16 +87,34 @@ window.addEventListener('click', (e) => {
 
     // Function to show the loading spinner
     function showLoading() {
+        isLoading = true;
         loadingSpinner.classList.add('visible');
+        
+        // Disable filter buttons during loading
+        filterButtons.forEach(button => {
+            button.disabled = true;
+            button.classList.add('disabled');
+        });
     }
     
     // Function to hide the loading spinner
     function hideLoading() {
+        isLoading = false;
         loadingSpinner.classList.remove('visible');
+        
+        // Enable filter buttons after loading
+        filterButtons.forEach(button => {
+            button.disabled = false;
+            button.classList.remove('disabled');
+        });
     }
     
     // Function to fetch tests from the server
     function fetchTests(labId) {
+        // Clear previous tests immediately to avoid confusion
+        testList.innerHTML = '';
+        tests = [];
+        
         showLoading(); // Show loading spinner
         fetch(`/tests?lab=${labId}`)
         .then(response => response.json())
@@ -150,6 +169,7 @@ window.addEventListener('click', (e) => {
         .catch(error => {
             console.error('Error fetching tests:', error);
             hideLoading(); // Hide spinner even if there's an error
+            testList.innerHTML = '<p>Error loading tests. Please try again.</p>';
         });
     }
     
@@ -176,14 +196,17 @@ window.addEventListener('click', (e) => {
     function displayTests(testsToShow) {
         testList.innerHTML = ''; // Clear existing tests
     
-        if (testsToShow.length === 0) {
+        // Only show "no tests found" when not loading
+        if (testsToShow.length === 0 && !isLoading) {
             testList.innerHTML = '<p>No tests found.</p>';
             return;
         }
     
-        testsToShow.forEach(test => {
+        testsToShow.forEach((test, index) => {
             const card = document.createElement('div');
             card.className = 'test-card';
+            // Add fade-in animation with slight delay for stagger effect
+            card.style.animationDelay = `${index * 0.02}s`;
             card.innerHTML = `
                 <span class="tick-icon">&#10004;</span>
                 <h3 class="test-name">${test.Name}</h3>
@@ -318,6 +341,11 @@ window.addEventListener('click', (e) => {
     // Handle Filter Button Clicks
     filterButtons.forEach(button => {
         button.addEventListener('click', () => {
+            // Prevent filter clicks during loading
+            if (isLoading) {
+                return;
+            }
+            
             const discount = parseInt(button.getAttribute('data-discount'));
 
             // Toggle the selected filter
@@ -400,6 +428,10 @@ window.addEventListener('click', (e) => {
         totalAmount = 0;
         selectedTestsList.innerHTML = '';
         updateTotalFee();
+        
+        // Reset filter selections
+        selectedDiscounts.clear();
+        filterButtons.forEach(btn => btn.classList.remove('active'));
         
         if (selectedLab === 'chughtai-lab' || selectedLab === 'idc-islamabad' || selectedLab === 'dr-essa-lab' || selectedLab === 'another-lab') {
             testSelectionContainer.style.display = 'block';
