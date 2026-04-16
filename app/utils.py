@@ -96,21 +96,40 @@ def move_code_to_availed(name, phone, email, selected_tests, discount_type=None,
             if discount_type == '30':
                 codes_ref = db.collection('codes30')
                 logger.info("Using codes30 collection for 30% discount")
+                
+                code_docs = codes_ref.where('isUsed', '==', 'false').limit(1).get()
+                if not code_docs:
+                    # Support boolean 'False' in case documents were added manually with a boolean type
+                    code_docs = codes_ref.where('isUsed', '==', False).limit(1).get()
+                
+                if not code_docs:
+                    logger.warning("No available booking codes found in collection: codes30")
+                    return None, []
             else:
-                codes_ref = db.collection('codes')
-                logger.info("Using default codes collection")
+                # For 20% discount (and others) - try multiple collections with fallback
+                collections_to_try = ['codes', 'codestwo', 'codesthree']
+                code_doc = None
+                codes_ref = None
+                used_collection = None
+                
+                for collection_name in collections_to_try:
+                    codes_ref = db.collection(collection_name)
+                    code_docs = codes_ref.where('isUsed', '==', 'false').limit(1).get()
+                    
+                    if not code_docs:
+                        # Support boolean 'False' in case documents were added manually with a boolean type
+                        code_docs = codes_ref.where('isUsed', '==', False).limit(1).get()
+                    
+                    if code_docs:
+                        code_doc = code_docs[0]
+                        used_collection = collection_name
+                        logger.info(f"Found available code in {collection_name} collection")
+                        break
+                
+                if not code_doc:
+                    logger.warning("No available booking codes found in any of the collections: codes, codestwo, codesthree")
+                    return None, []
 
-            code_docs = codes_ref.where('isUsed', '==', 'false').limit(1).get()
-
-            if not code_docs:
-                # Support boolean 'False' in case documents were added manually with a boolean type
-                code_docs = codes_ref.where('isUsed', '==', False).limit(1).get()
-
-            if not code_docs:
-                logger.warning(f"No available booking codes found in collection: {'codes30' if discount_type == '30' else 'codes'}")
-                return None, []
-
-            code_doc = code_docs[0]
             code_data = code_doc.to_dict()
             code = code_data.get('code')
 
@@ -120,7 +139,7 @@ def move_code_to_availed(name, phone, email, selected_tests, discount_type=None,
 
             # Delete the code document
             codes_ref.document(code_doc.id).delete()
-            logger.info(f"Deleted code {code} from collection.")
+            logger.info(f"Deleted code {code} from collection {used_collection if 'used_collection' in locals() else 'codes30'}.")
         else:
             # For other labs - use fixed code
             code = lab_config['fixed_code']
