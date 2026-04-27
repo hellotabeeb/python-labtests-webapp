@@ -89,39 +89,41 @@ def move_code_to_availed(name, phone, email, selected_tests, discount_type=None,
 
         # Get lab configuration
         lab_config = lab_configs.get(lab, lab_configs['chughtai-lab'])
+
+        def get_first_available_code(collection_name):
+            collection_ref = db.collection(collection_name)
+
+            # Support both boolean and legacy string values stored in Firestore.
+            for availability_value in (False, 'false', 'False'):
+                code_docs = collection_ref.where('isUsed', '==', availability_value).limit(1).get()
+                if code_docs:
+                    return collection_ref, code_docs[0]
+
+            return collection_ref, None
         
         # Handle code assignment based on lab type
         if lab_config['uses_dynamic_codes']:
+            used_collection = None
+            codes_ref = None
+            code_doc = None
+
             # For Chughtai Lab - use existing code system
             if discount_type == '30':
-                codes_ref = db.collection('codes30')
+                used_collection = 'codes30'
                 logger.info("Using codes30 collection for 30% discount")
-                
-                code_docs = codes_ref.where('isUsed', '==', 'false').limit(1).get()
-                if not code_docs:
-                    # Support boolean 'False' in case documents were added manually with a boolean type
-                    code_docs = codes_ref.where('isUsed', '==', False).limit(1).get()
-                
-                if not code_docs:
+
+                codes_ref, code_doc = get_first_available_code(used_collection)
+                if not code_doc:
                     logger.warning("No available booking codes found in collection: codes30")
                     return None, []
             else:
                 # For 20% discount (and others) - try multiple collections with fallback
                 collections_to_try = ['codes', 'codestwo', 'codesthree']
-                code_doc = None
-                codes_ref = None
-                used_collection = None
                 
                 for collection_name in collections_to_try:
-                    codes_ref = db.collection(collection_name)
-                    code_docs = codes_ref.where('isUsed', '==', 'false').limit(1).get()
-                    
-                    if not code_docs:
-                        # Support boolean 'False' in case documents were added manually with a boolean type
-                        code_docs = codes_ref.where('isUsed', '==', False).limit(1).get()
-                    
-                    if code_docs:
-                        code_doc = code_docs[0]
+                    codes_ref, code_doc = get_first_available_code(collection_name)
+
+                    if code_doc:
                         used_collection = collection_name
                         logger.info(f"Found available code in {collection_name} collection")
                         break
@@ -139,7 +141,7 @@ def move_code_to_availed(name, phone, email, selected_tests, discount_type=None,
 
             # Delete the code document
             codes_ref.document(code_doc.id).delete()
-            logger.info(f"Deleted code {code} from collection {used_collection if 'used_collection' in locals() else 'codes30'}.")
+            logger.info(f"Deleted code {code} from collection {used_collection}.")
         else:
             # For other labs - use fixed code
             code = lab_config['fixed_code']
