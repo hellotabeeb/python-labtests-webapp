@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const selectedTestsList = document.getElementById('selected-tests-list');
     const totalFeeElement = document.getElementById('total-fee');
     const form = document.getElementById('lab-test-form');
+    const discountTypeInput = document.getElementById('discount-type');
     const loadingSpinner = document.getElementById('loading-spinner');
     const filterButtons = document.querySelectorAll('.filter-button');
     const infoIcon = document.querySelector('.info-icon');
@@ -22,16 +23,6 @@ document.addEventListener('DOMContentLoaded', function() {
     let totalAmount = 0;
     let selectedDiscounts = new Set(); // To store selected discount filters
     let isLoading = false; // Track loading state to prevent race conditions
-
-
-document.querySelectorAll('.filter-button').forEach(button => {
-    button.addEventListener('click', function() {
-        const discountValue = this.dataset.discount;
-        document.getElementById('discount-type').value = discountValue;
-    });
-});
-
-
 
 
 // Temporarily disabled 12% discount popup functionality
@@ -320,6 +311,17 @@ window.addEventListener('click', (e) => {
             alert('Please select at least one test before submitting.');
             return;
         }
+
+        // Keep booking code source aligned with selected test discounts.
+        if (!discountTypeInput.value) {
+            const selectedTestDiscounts = tests
+                .filter(test => selectedTests.has(test.id))
+                .map(test => Number(test.discount) || 0);
+
+            if (selectedTestDiscounts.length > 0) {
+                discountTypeInput.value = String(Math.max(...selectedTestDiscounts));
+            }
+        }
     
         // Clear any existing hidden inputs
         const existingInputs = form.querySelectorAll('input[name="selected-tests"]');
@@ -352,6 +354,7 @@ window.addEventListener('click', (e) => {
             if (selectedDiscounts.has(discount)) {
                 selectedDiscounts.delete(discount);
                 button.classList.remove('active');
+                discountTypeInput.value = '';
             } else {
                 // Deselect other filters
                 filterButtons.forEach(btn => {
@@ -361,6 +364,7 @@ window.addEventListener('click', (e) => {
 
                 selectedDiscounts.add(discount);
                 button.classList.add('active');
+                discountTypeInput.value = String(discount);
             }
 
             applyFilters();
@@ -432,6 +436,7 @@ window.addEventListener('click', (e) => {
         // Reset filter selections
         selectedDiscounts.clear();
         filterButtons.forEach(btn => btn.classList.remove('active'));
+        discountTypeInput.value = '';
         
         if (selectedLab === 'chughtai-lab' || selectedLab === 'idc-islamabad' || selectedLab === 'dr-essa-lab' || selectedLab === 'another-lab') {
             testSelectionContainer.style.display = 'block';
