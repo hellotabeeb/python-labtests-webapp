@@ -4,5 +4,6 @@
 .env
 
 # Firebase service account
-serviceAccountKey.json
-googledrivecredentials.json
+app/serviceAccountKey.json
+app/googledrivecredentials.json
+client_secret_*.json
