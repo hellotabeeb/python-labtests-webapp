@@ -123,6 +123,15 @@ def create_app():
     drive_service = create_drive_service()
     app.drive_service = drive_service  # Attach to app context
 
+    # Add redirect handler for .pk domain to .com domain
+    @app.before_request
+    def redirect_pk_to_com():
+        from flask import request, redirect
+        if 'hellotabeeb.pk' in request.host:
+            # Redirect from .pk to .com domain with permanent redirect (301)
+            url = request.url.replace('hellotabeeb.pk', 'hellotabeeb.com')
+            return redirect(url, code=301)
+
     # Register blueprints
     from .routes import main
     app.register_blueprint(main)

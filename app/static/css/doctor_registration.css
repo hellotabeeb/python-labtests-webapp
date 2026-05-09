@@ -394,3 +394,53 @@ small {
         font-size: 12px;
     }
 }
+
+.app-promo {
+    width: 100%;
+    max-width: 1000px;
+    margin: 30px auto 0;
+}
+
+.app-promo-card {
+    background-color: var(--white);
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+}
+
+.app-promo-image {
+    width: 220px;
+    max-width: 100%;
+    height: auto;
+}
+
+.app-promo-text {
+    margin: 0;
+    color: var(--text-color);
+    font-size: 16px;
+}
+
+.app-promo-text a {
+    color: var(--primary-color);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.app-promo-text a:hover {
+    text-decoration: underline;
+}
+
+@media screen and (max-width: 768px) {
+    .app-promo-card {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .app-promo-image {
+        width: 200px;
+    }
+}

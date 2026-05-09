@@ -17,17 +17,16 @@ logger = logging.getLogger(__name__)
 
 # Brevo Configuration
 configuration = Configuration()
-
 configuration.api_key['api-key'] = os.getenv('BREVO_API_KEY')
 
-# Replace line 19 with:
-
-if not configuration.api_key['api-key']:
-    logger.error("Brevo API key not found in environment variables.")
-    raise ValueError("Brevo API key is missing.")
-
-api_client = ApiClient(configuration)
-api_instance = TransactionalEmailsApi(api_client)
+# Initialize API client only if API key exists
+if configuration.api_key['api-key']:
+    api_client = ApiClient(configuration)
+    api_instance = TransactionalEmailsApi(api_client)
+else:
+    logger.warning("Brevo API key not found - email functionality will be disabled for local testing.")
+    api_client = None
+    api_instance = None
 
 def fetch_tests():
     """
@@ -414,8 +413,11 @@ def send_email(email, name, tests_details, code, lab_name, is_twelve_percent=Fal
             html_content=html_content
         )
         
-        api_instance.send_transac_email(send_smtp_email)
-        logger.info(f"Email sent successfully to {email} with code {code}.")
+        if api_instance:
+            api_instance.send_transac_email(send_smtp_email)
+            logger.info(f"Email sent successfully to {email} with code {code}.")
+        else:
+            logger.warning(f"Email not sent to {email} - Brevo API key not configured (local testing mode)")
 
         # Send email to admin
         admin_email = "bookings@hellotabeeb.com"
@@ -445,8 +447,11 @@ def send_email(email, name, tests_details, code, lab_name, is_twelve_percent=Fal
             html_content=admin_html_content
         )
         
-        api_instance.send_transac_email(admin_send_smtp_email)
-        logger.info(f"Admin notification email sent for booking by {email}")
+        if api_instance:
+            api_instance.send_transac_email(admin_send_smtp_email)
+            logger.info(f"Admin notification email sent for booking by {email}")
+        else:
+            logger.warning(f"Admin notification email not sent - Brevo API key not configured")
 
     except ApiException as e:
         logger.error(f"Brevo API Exception when sending email to {email}: {e}")

@@ -12,7 +12,7 @@
         <header class="header">
             <div class="logo-container">
                 <a href="{{ url_for('main.doctor_registration') }}">
-                    <img src="static/121.png" alt="logo" class="logo">
+                    <img src="{{ url_for('static', filename='121.png') }}" alt="logo" class="logo">
                 </a>
             </div>
             
@@ -500,7 +500,7 @@
                     <div class="input-group">
                         <label for="doctor-image">Profile Picture</label>
                         <input type="file" id="doctor-image" name="doctor-image" accept="image/*" required>
-                        <small>Profile picture guidelines: Please attach a clinical background picture. Maximum size: 5MB</small>
+                        <small>Profile picture guidelines: Please attach a clinical background picture. Maximum size: 2MB</small>
                     </div>
                 </div>
             </div>
@@ -717,6 +717,16 @@
                 <button type="submit" class="btn-submit">Complete Registration</button>
             </div>
         </form>
+
+        <section class="app-promo">
+            <div class="app-promo-card">
+                <img src="{{ url_for('static', filename='Mobile picture.png') }}" alt="HelloTabeeb mobile app" class="app-promo-image">
+                <p class="app-promo-text">
+                    Our app is live, do check it out:
+                    <a href="https://play.google.com/store/apps/details?id=com.bethehealthsmc.hellotabeeb&hl=en" target="_blank" rel="noopener">Google Play</a>
+                </p>
+            </div>
+        </section>
     </div>
 
     <!-- Loading Spinner -->

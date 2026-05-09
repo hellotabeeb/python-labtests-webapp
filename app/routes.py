@@ -17,6 +17,8 @@ from brevo_python import Configuration, ApiClient, TransactionalEmailsApi, SendS
 from brevo_python.rest import ApiException
 from datetime import datetime
 import json
+from io import BytesIO
+from PIL import Image, ImageDraw, ImageFont
 from firebase_admin import firestore, credentials, initialize_app, get_app, _apps
 from firebase_admin import firestore, credentials, initialize_app, _apps
 
@@ -78,6 +80,10 @@ def firebase_config():
 
 @main.route('/')
 def index():
+    return redirect(url_for('main.labs'))
+
+@main.route('/labs')
+def labs():
     return render_template('index.html')
 
 @main.route('/appointment')
@@ -570,6 +576,22 @@ def register_doctor():
         doctor_image = request.files['doctor-image']
         doctor_resume = request.files['doctor-resume']
 
+        if not doctor_image or doctor_image.filename == '':
+            return jsonify({'success': False, 'message': 'Profile picture is required.'}), 400
+
+        if not doctor_resume or doctor_resume.filename == '':
+            return jsonify({'success': False, 'message': 'Resume is required.'}), 400
+
+        if not doctor_image.mimetype or not doctor_image.mimetype.startswith('image/'):
+            return jsonify({'success': False, 'message': 'Profile picture must be an image file.'}), 400
+
+        doctor_image.stream.seek(0, os.SEEK_END)
+        image_size = doctor_image.stream.tell()
+        doctor_image.stream.seek(0)
+
+        if image_size > 2 * 1024 * 1024:
+            return jsonify({'success': False, 'message': 'Profile picture must be 2MB or less.'}), 400
+
         if doctor_image and doctor_resume:
             # File handling functions
             def create_folder(folder_name, parent_id=None):
@@ -582,9 +604,10 @@ def register_doctor():
                 folder = drive_service.files().create(body=file_metadata, fields='id').execute()
                 return folder.get('id')
 
-            def upload_to_drive(file, filename, folder_id=None):
-                mime_type, _ = mimetypes.guess_type(filename)
-                media = MediaIoBaseUpload(file, mimetype=mime_type)
+            def upload_to_drive(file_obj, filename, folder_id=None, mime_type=None):
+                if not mime_type:
+                    mime_type, _ = mimetypes.guess_type(filename)
+                media = MediaIoBaseUpload(file_obj, mimetype=mime_type)
                 file_metadata = {'name': filename}
                 if folder_id:
                     file_metadata['parents'] = [folder_id]
@@ -596,6 +619,89 @@ def register_doctor():
                 ).execute()
                 
                 return file.get('webViewLink')
+
+            def load_font(size):
+                try:
+                    return ImageFont.truetype('DejaVuSans.ttf', size)
+                except Exception:
+                    return ImageFont.load_default()
+
+            def prepare_profile_image(file_storage, doctor_name, medical_license, logo_path):
+                file_storage.stream.seek(0)
+
+                with Image.open(file_storage.stream) as source_image:
+                    image = source_image.convert('RGBA')
+                    width, height = image.size
+                    target_ratio = 3 / 4
+                    current_ratio = width / height
+
+                    if current_ratio > target_ratio:
+                        new_width = int(height * target_ratio)
+                        left = (width - new_width) // 2
+                        image = image.crop((left, 0, left + new_width, height))
+                    else:
+                        new_height = int(width / target_ratio)
+                        top = (height - new_height) // 2
+                        image = image.crop((0, top, width, top + new_height))
+
+                    base_width = 900
+                    base_height = 1200
+                    image = image.resize((base_width, base_height), Image.LANCZOS)
+
+                    if os.path.exists(logo_path):
+                        with Image.open(logo_path) as logo_image:
+                            logo = logo_image.convert('RGBA')
+                            max_logo_size = int(base_width * 0.22)
+                            logo.thumbnail((max_logo_size, max_logo_size), Image.LANCZOS)
+
+                            if logo.mode == 'RGBA':
+                                alpha = logo.split()[-1]
+                                alpha = alpha.point(lambda value: int(value * 0.9))
+                                logo.putalpha(alpha)
+
+                            logo_x = (base_width - logo.width) // 2
+                            logo_y = (base_height - logo.height) // 2
+                            image.alpha_composite(logo, (logo_x, logo_y))
+
+                    draw = ImageDraw.Draw(image)
+                    font_size = max(20, int(base_height * 0.03))
+                    font = load_font(font_size)
+                    margin = int(base_width * 0.04)
+                    padding = 8
+                    text_color = (255, 255, 255, 255)
+                    box_color = (0, 0, 0, 140)
+
+                    def draw_label(text, x, y):
+                        if not text:
+                            return
+                        label = text.strip()
+                        if not label:
+                            return
+                        bbox = draw.textbbox((0, 0), label, font=font)
+                        text_width = bbox[2] - bbox[0]
+                        text_height = bbox[3] - bbox[1]
+                        rect = [
+                            x - padding,
+                            y - padding,
+                            x + text_width + padding,
+                            y + text_height + padding
+                        ]
+                        draw.rectangle(rect, fill=box_color)
+                        draw.text((x, y), label, font=font, fill=text_color)
+
+                    draw_label(doctor_name, margin, margin)
+
+                    if medical_license:
+                        license_label = f"Reg: {medical_license.strip()}"
+                        license_bbox = draw.textbbox((0, 0), license_label, font=font)
+                        license_height = license_bbox[3] - license_bbox[1]
+                        license_y = base_height - margin - license_height
+                        draw_label(license_label, margin, license_y)
+
+                    output = BytesIO()
+                    image.convert('RGB').save(output, format='JPEG', quality=88, optimize=True)
+                    output.seek(0)
+                    return output, 'image/jpeg'
 
             # Helper functions for getting correct labels
             def get_license_label(country):
@@ -1015,7 +1121,44 @@ def register_doctor():
             parent_folder_id = files[0]['id'] if files else create_folder(parent_folder_name)
             email_folder_id = create_folder(data['email'], parent_id=parent_folder_id)
 
-            image_link = upload_to_drive(doctor_image.stream, secure_filename(doctor_image.filename), folder_id=email_folder_id)
+            doctor_name = data.get('full-name', '').strip()
+            medical_license = data.get('medical-license', '').strip()
+            logo_path = os.path.join(current_app.root_path, 'static', '121.png')
+
+            # TEMPORARILY DISABLED: Logo and registration number overlay functionality
+            # TODO: Re-enable after testing and refinement
+            # Uncomment the below block to restore the image processing with logo and name + reg number
+            """
+            try:
+                processed_image, processed_mime = prepare_profile_image(
+                    doctor_image,
+                    doctor_name,
+                    medical_license,
+                    logo_path
+                )
+            except Exception as exc:
+                logger.error(f"Error processing profile image: {exc}")
+                return jsonify({'success': False, 'message': 'Failed to process profile picture.'}), 500
+
+            processed_filename = secure_filename(f"{doctor_name or 'doctor'}_profile.jpg")
+
+            image_link = upload_to_drive(
+                processed_image,
+                processed_filename,
+                folder_id=email_folder_id,
+                mime_type=processed_mime
+            )
+            """
+            
+            # Upload original image without processing
+            doctor_image.stream.seek(0)
+            original_filename = secure_filename(f"{doctor_name or 'doctor'}_profile.jpg")
+            image_link = upload_to_drive(
+                doctor_image.stream,
+                original_filename,
+                folder_id=email_folder_id,
+                mime_type=doctor_image.content_type
+            )
             resume_link = upload_to_drive(doctor_resume.stream, secure_filename(doctor_resume.filename), folder_id=email_folder_id)
 
             data['profile_picture_url'] = image_link
@@ -1061,7 +1204,7 @@ def register_doctor():
                 """
 
                 admin_email = SendSmtpEmail(
-                    to=[{"email": "shahzad892@gmail.com"}],
+                    to=[{"email": "faizanahmedfayyaz10@gmail.com"}],
                     sender=sender,
                     subject="New Doctor Registration",
                     html_content=admin_html_content

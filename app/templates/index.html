@@ -55,16 +55,16 @@
                 </div>
                 <div class="custom-options">
                     <span class="custom-option" data-value="chughtai-lab">
-                        <img src="static/download (2).png" alt="Chughtai Lab"> Chughtai Lab
+                        <img src="{{ url_for('static', filename='download (2).png') }}" alt="Chughtai Lab"> Chughtai Lab
                     </span>
                     <span class="custom-option" data-value="idc-islamabad">
-                        <img src="static/1.PNG" alt="IDC Islamabad"> IDC (Islamabad Diagnostic Center)
+                        <img src="{{ url_for('static', filename='1.PNG') }}" alt="IDC Islamabad"> IDC (Islamabad Diagnostic Center)
                     </span>
                     <span class="custom-option" data-value="dr-essa-lab">
-                        <img src="static/2.png" alt="Dr. Essa Lab"> Dr. Essa Lab
+                        <img src="{{ url_for('static', filename='2.PNG') }}" alt="Dr. Essa Lab"> Dr. Essa Lab
                     </span>
                     <span class="custom-option" data-value="another-lab">
-                        <img src="static/excel.png" alt="Excel Lab"> Excel Lab
+                        <img src="{{ url_for('static', filename='excel.png') }}" alt="Excel Lab"> Excel Lab
                     </span>
                 </div>
             </div>
@@ -137,6 +137,16 @@
         <!-- Submit Button -->
         <button type="submit">Confirm Booking</button>
     </form>
+
+    <section class="app-promo">
+        <div class="app-promo-card">
+            <img src="{{ url_for('static', filename='Mobile picture.png') }}" alt="HelloTabeeb mobile app" class="app-promo-image">
+            <p class="app-promo-text">
+                Our app is live, do check it out:
+                <a href="https://play.google.com/store/apps/details?id=com.bethehealthsmc.hellotabeeb&hl=en" target="_blank" rel="noopener">Google Play</a>
+            </p>
+        </div>
+    </section>
     
     <!-- Optional: Include an icon library like Font Awesome for better icons -->
     <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"> -->

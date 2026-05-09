@@ -21,6 +21,76 @@ document.addEventListener('DOMContentLoaded', function() {
     const medicalLicenseInput = document.getElementById('medical-license');
     const nationalIdInput = document.getElementById('national-id');
 
+    const countryAliases = {
+        'united states': 'united states of america',
+        'united states of america': 'united states of america',
+        'russian federation': 'russia',
+        'south korea': 'korea, south',
+        'north korea': 'korea, north',
+        'iran, islamic republic of': 'iran',
+        'bolivia (plurinational state of)': 'bolivia',
+        'tanzania, united republic of': 'tanzania',
+        'venezuela, bolivarian republic of': 'venezuela',
+        'moldova, republic of': 'moldova',
+        "lao people's democratic republic": 'laos',
+        'syrian arab republic': 'syria',
+        'brunei darussalam': 'brunei',
+        'cabo verde': 'cabo verde',
+        'taiwan, province of china': 'taiwan'
+    };
+
+    const normalizeCountry = (value) => (value || '').trim().toLowerCase();
+
+    const setDoctorCountry = (countryName) => {
+        if (!countrySelect) return;
+        const normalized = normalizeCountry(countryName);
+        const alias = countryAliases[normalized] || normalized;
+
+        const options = Array.from(countrySelect.options || []);
+        const match = options.find(option => normalizeCountry(option.value) === alias)
+            || options.find(option => normalizeCountry(option.textContent) === alias);
+
+        if (match) {
+            countrySelect.value = match.value;
+            countrySelect.dispatchEvent(new Event('change'));
+        }
+    };
+
+    const setProCountry = (countryName) => {
+        if (!proCountrySelect) return;
+        const normalized = normalizeCountry(countryName);
+        if (normalized === 'pakistan') {
+            proCountrySelect.value = 'pakistan';
+        } else {
+            proCountrySelect.value = 'other';
+        }
+        proCountrySelect.dispatchEvent(new Event('change'));
+    };
+
+    const requestLocationCountry = () => {
+        if (!navigator.geolocation) return;
+
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const { latitude, longitude } = position.coords;
+                const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=3&addressdetails=1`;
+
+                fetch(url, { headers: { 'Accept': 'application/json' } })
+                    .then(response => response.ok ? response.json() : null)
+                    .then(data => {
+                        const countryName = data && data.address && data.address.country;
+                        if (countryName) {
+                            setDoctorCountry(countryName);
+                            setProCountry(countryName);
+                        }
+                    })
+                    .catch(() => undefined);
+            },
+            () => undefined,
+            { enableHighAccuracy: false, timeout: 8000, maximumAge: 600000 }
+        );
+    };
+
     // Initialize loading spinner
     loadingSpinner.className = 'loading-spinner';
     loadingSpinner.innerHTML = '<div class="spinner"></div>';
@@ -2045,10 +2115,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (!this.files || !this.files[0]) return;
                 
                 const fileSize = this.files[0].size;
-                const maxSize = 5 * 1024 * 1024; // 5MB
+                const maxSize = this.id === 'doctor-image' ? 2 * 1024 * 1024 : 5 * 1024 * 1024;
                 
                 if (fileSize > maxSize) {
-                    alert('File size exceeds 5MB limit. Please choose a smaller file.');
+                    const maxLabel = this.id === 'doctor-image' ? '2MB' : '5MB';
+                    alert(`File size exceeds ${maxLabel} limit. Please choose a smaller file.`);
                     this.value = '';
                 }
             });
@@ -2169,4 +2240,6 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     }
+
+    requestLocationCountry();
 });
