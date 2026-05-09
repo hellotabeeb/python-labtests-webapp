@@ -1204,7 +1204,7 @@ def register_doctor():
                 """
 
                 admin_email = SendSmtpEmail(
-                    to=[{"email": "faizanahmedfayyaz10@gmail.com"}],
+                    to=[{"email": "shahzad892@gmail.com"}],
                     sender=sender,
                     subject="New Doctor Registration",
                     html_content=admin_html_content
