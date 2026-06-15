@@ -204,7 +204,7 @@ window.addEventListener('click', (e) => {
             card.className = 'test-card';
             // Add fade-in animation with slight delay for stagger effect
             card.style.animationDelay = `${index * 0.02}s`;
-            card.innerHTML = `
+            card.innerHTML = test.discount > 0 ? `
                 <span class="tick-icon">&#10004;</span>
                 <h3 class="test-name">${test.Name}</h3>
                 <div class="price-container">
@@ -212,6 +212,12 @@ window.addEventListener('click', (e) => {
                     <p class="discounted-price">Rs.${applyDiscount(test.Fees, test.discount)}</p>
                 </div>
                 <span class="discount-tag">${test.discount}% Off</span>
+            ` : `
+                <span class="tick-icon">&#10004;</span>
+                <h3 class="test-name">${test.Name}</h3>
+                <div class="price-container">
+                    <p class="discounted-price">Rs.${test.Fees}</p>
+                </div>
             `;
             testList.appendChild(card);
     

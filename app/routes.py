@@ -1578,13 +1578,21 @@ def book():
             logger.info(f"Excel Lab booking successful for user {email}.")
         
         elif lab == 'sehat-lab':
-            code, tests_details = move_code_to_availed(name, phone, email, selected_tests, discount_type, lab)
-            if not code:
-                flash('No available booking codes found.', 'error')
-                return redirect(url_for('main.index'))
-            
-            # Sehat Lab: no discount codes — direct pricing only
+            # Sehat Lab: no discount codes — fetch test details directly
             code = 'N/A'
+            tests_details = []
+            tests_ref = db.collection('labs').document('sehatLab').collection('tests')
+            for test_id in selected_tests:
+                test_doc = tests_ref.document(test_id).get()
+                if test_doc.exists:
+                    test_data = test_doc.to_dict()
+                    test_name = test_data.get('Name', 'N/A')
+                    fee = test_data.get('Fees', '0')
+                    tests_details.append({
+                        'name': test_name,
+                        'original_fee': f"Rs.{float(fee):.2f}",
+                        'discounted_fee': f"Rs.{float(fee):.2f}"
+                    })
             
             current_month = datetime.utcnow().strftime('%m-%Y')
             availed_code_data = {
