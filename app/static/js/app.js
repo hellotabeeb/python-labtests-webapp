@@ -73,6 +73,12 @@ window.addEventListener('click', (e) => {
             highDiscountTests: [],
             highDiscountPercentage: 15,
             testsToPlaceLast: []
+        },
+        'sehat-lab': {
+            defaultDiscount: 0,
+            highDiscountTests: [],
+            highDiscountPercentage: 0,
+            testsToPlaceLast: []
         }
     };
 
@@ -438,7 +444,7 @@ window.addEventListener('click', (e) => {
         filterButtons.forEach(btn => btn.classList.remove('active'));
         discountTypeInput.value = '';
         
-        if (selectedLab === 'chughtai-lab' || selectedLab === 'idc-islamabad' || selectedLab === 'dr-essa-lab' || selectedLab === 'another-lab') {
+        if (selectedLab === 'chughtai-lab' || selectedLab === 'idc-islamabad' || selectedLab === 'dr-essa-lab' || selectedLab === 'another-lab' || selectedLab === 'sehat-lab') {
             testSelectionContainer.style.display = 'block';
             comingSoonMessage.style.display = 'none';
             

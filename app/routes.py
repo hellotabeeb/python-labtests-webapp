@@ -1577,6 +1577,31 @@ def book():
             flash('Excel Lab booking successful! A confirmation email has been sent.', 'success')
             logger.info(f"Excel Lab booking successful for user {email}.")
         
+        elif lab == 'sehat-lab':
+            code, tests_details = move_code_to_availed(name, phone, email, selected_tests, discount_type, lab)
+            if not code:
+                flash('No available booking codes found.', 'error')
+                return redirect(url_for('main.index'))
+            
+            # Sehat Lab: no discount codes — direct pricing only
+            code = 'N/A'
+            
+            current_month = datetime.utcnow().strftime('%m-%Y')
+            availed_code_data = {
+                'name': name,
+                'phone': phone,
+                'email': email,
+                'lab': lab,
+                'code': code,
+                'tests': tests_details,
+                'timestamp': datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'),
+                'discount_type': '0%'
+            }
+            db.collection('availedCodes').document(current_month).collection('details').document(f"sehat_{datetime.utcnow().strftime('%Y%m%d%H%M%S')}").set(availed_code_data)
+            send_email(email, name, tests_details, code, "Sehat Lab & Diagnostic Center", is_twelve_percent=False)
+            flash('Sehat Lab booking successful! A confirmation email has been sent.', 'success')
+            logger.info(f"Sehat Lab booking successful for user {email}.")
+        
         else:
             flash('Invalid lab selection.', 'error')
             logger.warning(f"Invalid lab selection: {lab}")
@@ -1605,7 +1630,8 @@ def get_tests():
             'chughtai-lab': 'labs/chughtaiLab/tests',
             'idc-islamabad': 'labs/IDC/tests',
             'dr-essa-lab': 'labs/essa/tests',     # Added Dr. Essa Lab
-            'another-lab': 'labs/excel/tests'     # Added Excel Lab
+            'another-lab': 'labs/excel/tests',     # Added Excel Lab
+            'sehat-lab': 'labs/sehatLab/tests'     # Added Sehat Lab
         }
 
         lab = request.args.get('lab', 'chughtai-lab')

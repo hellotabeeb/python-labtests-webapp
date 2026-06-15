@@ -83,6 +83,14 @@ def move_code_to_availed(name, phone, email, selected_tests, discount_type=None,
                 'high_discount_percentage': 15,
                 'uses_dynamic_codes': False,
                 'fixed_code': 'HTB'
+            },
+            'sehat-lab': {
+                'collection_path': 'labs/sehatLab/tests',
+                'default_discount': 0,
+                'high_discount_tests': [],
+                'high_discount_percentage': 0,
+                'uses_dynamic_codes': False,
+                'fixed_code': 'N/A'
             }
         }
 
@@ -215,19 +223,27 @@ def generate_email_template(name, tests_details, discount_code, lab_name, is_twe
     Generates the HTML email content using the provided template.
     Includes special 12% discount offer messaging when applicable.
     """
-    tests_html = ''.join([
-        f"""
+    tests_html_parts = []
+    for test in tests_details:
+        if test['original_fee'] == test['discounted_fee']:
+            # No discount — show single price without strikethrough
+            fee_html = f"""<span style="font-weight: bold;">{test['original_fee']}</span>"""
+        else:
+            # Has discount — show strikethrough original + discounted
+            fee_html = f"""<span style="text-decoration: line-through; color: #a0a0a0;">{test['original_fee']}</span>
+            <span style="color: #e74c3c; font-weight: bold;"> {test['discounted_fee']}</span>"""
+        tests_html_parts.append(f"""
         <li>
             <strong>Test:</strong> {test['name']}<br>
-            <strong>Fee:</strong> <span style="text-decoration: line-through; color: #a0a0a0;">{test['original_fee']}</span>
-            <span style="color: #e74c3c; font-weight: bold;"> {test['discounted_fee']}</span>
+            <strong>Fee:</strong> {fee_html}
         </li>
-        """
-        for test in tests_details
-    ])
+        """)
+    tests_html = ''.join(tests_html_parts)
 
     # Add specific handling for IDC code
-    if discount_code == 'IDC':
+    if discount_code == 'N/A':
+        code_section = ""  # No discount code section for Sehat Lab
+    elif discount_code == 'IDC':
         code_section = "<p><strong>Your lab test code: IDC</strong></p>"
     else:
         code_section = f"<p><strong>Your code: {discount_code}</strong></p>"
@@ -358,11 +374,13 @@ def generate_email_template(name, tests_details, discount_code, lab_name, is_twe
                     </div>
     
                     <!-- Show this mail at the Lab -->
+                    {'' if discount_code == 'N/A' else '''
                     <div style="text-align: center; margin-top: 30px; padding: 20px; border-top: 1px solid #eee;">
                         <p style="font-size: 20px; font-weight: bold; color: #2c3e50; margin: 10px 0;">
                             Show this mail at the Lab during your visit or home sampling to avail discount
                         </p>
                     </div>
+                    '''}
                 </div>
             </body>
         </html>
