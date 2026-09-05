@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Barefruit Organics — Our Products</title>
+<style>
+  :root{
+    --navy:#193F6C; --ocean:#2E7DD1; --sky:#4782DE;
+    --green:#2ECC71; --green-dark:#27ae60; --red:#E74C3C;
+    --ink:#1a202c; --muted:#6B7B8A; --line:#e5e7eb; --bg:#FAFBFC;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Segoe UI',Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+  a{color:inherit}
+  header{background:linear-gradient(135deg,var(--navy) 0%,var(--ocean) 55%,var(--sky) 100%);color:#fff;padding:26px 20px 30px;border-radius:0 0 26px 26px}
+  .head-top{max-width:1080px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .brand{display:flex;align-items:center;gap:12px}
+  .brand img{height:40px;width:auto;background:#fff;border-radius:10px;padding:4px}
+  .brand h1{font-size:20px;font-weight:700;letter-spacing:.4px}
+  .brand small{display:block;font-size:12px;opacity:.85;font-weight:400}
+  .cart-btn{position:relative;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);color:#fff;padding:10px 18px;border-radius:50px;font-weight:600;cursor:pointer;font-size:14px}
+  .cart-btn .count{position:absolute;top:-8px;right:-8px;background:var(--red);color:#fff;font-size:11px;font-weight:700;min-width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;padding:0 5px}
+  .hero{max-width:1080px;margin:20px auto 0;text-align:center}
+  .hero h2{font-size:26px;font-weight:800}
+  .hero p{opacity:.9;margin-top:6px;font-size:14px}
+  .highlights{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px}
+  .chip{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);padding:6px 14px;border-radius:50px;font-size:12px}
+  main{max-width:1080px;margin:26px auto;padding:0 20px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:18px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:20px;overflow:hidden;box-shadow:0 6px 22px rgba(25,63,108,.07);display:flex;flex-direction:column;transition:transform .15s}
+  .card:hover{transform:translateY(-3px)}
+  .thumb{aspect-ratio:1/1;background:linear-gradient(135deg,#eef4ff,#dcebff);display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden}
+  .thumb img{width:100%;height:100%;object-fit:cover}
+  .thumb .ph{font-size:52px}
+  .card-body{padding:14px 16px 18px;display:flex;flex-direction:column;gap:6px;flex:1}
+  .card-body h3{font-size:16px;color:var(--navy)}
+  .pack{font-size:12px;color:var(--muted)}
+  .price{font-weight:800;color:var(--navy);font-size:18px;margin-top:2px}
+  .add{margin-top:auto;border:none;background:linear-gradient(135deg,var(--ocean),var(--sky));color:#fff;padding:11px;border-radius:50px;font-weight:700;cursor:pointer;font-size:14px}
+  .qty{display:flex;align-items:center;justify-content:space-between;margin-top:auto;border:1px solid var(--line);border-radius:50px;overflow:hidden}
+  .qty button{border:none;background:#f1f5fb;color:var(--navy);width:40px;height:40px;font-size:18px;cursor:pointer}
+  .qty span{font-weight:700}
+  /* overlay panels */
+  .overlay{position:fixed;inset:0;background:rgba(15,26,42,.55);display:none;align-items:center;justify-content:center;padding:16px;z-index:50}
+  .overlay.open{display:flex}
+  .panel{background:#fff;border-radius:22px;max-width:560px;width:100%;max-height:92vh;overflow:auto}
+  .panel-head{position:sticky;top:0;background:#fff;padding:18px 22px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:between;gap:10px}
+  .panel-head h3{color:var(--navy);font-size:18px;flex:1}
+  .x{border:none;background:#f1f5fb;color:var(--navy);width:34px;height:34px;border-radius:50%;font-size:18px;cursor:pointer}
+  .panel-body{padding:20px 22px}
+  .detail-img{aspect-ratio:16/10;border-radius:16px;background:linear-gradient(135deg,#eef4ff,#dcebff);display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:16px}
+  .detail-img img{width:100%;height:100%;object-fit:cover}
+  .detail-img .ph{font-size:64px}
+  .bullets{margin:12px 0 0 18px;color:#4a5568;line-height:1.9;font-size:14px}
+  /* cart rows */
+  .crow{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+  .crow .info{flex:1}
+  .crow .info b{color:var(--navy)}
+  .crow .info small{display:block;color:var(--muted)}
+  .rm{border:none;background:#fff0ef;color:var(--red);border-radius:10px;padding:8px 10px;cursor:pointer;font-size:13px}
+  .empty{text-align:center;padding:40px 10px;color:var(--muted)}
+  .empty .big{font-size:52px}
+  .summary{display:flex;justify-content:space-between;font-weight:800;color:var(--navy);font-size:18px;margin:16px 0}
+  .btn-primary{width:100%;border:none;background:linear-gradient(135deg,var(--green-dark),var(--green));color:#fff;padding:15px;border-radius:50px;font-weight:800;font-size:15px;cursor:pointer}
+  .btn-block{width:100%;border:none;background:linear-gradient(135deg,var(--navy),var(--ocean));color:#fff;padding:14px;border-radius:50px;font-weight:700;font-size:14px;cursor:pointer;margin-top:10px}
+  .field{margin-bottom:14px}
+  .field label{display:block;font-size:13px;font-weight:600;color:var(--navy);margin-bottom:6px}
+  .field input,.field select,.field textarea{width:100%;border:1px solid var(--line);border-radius:14px;padding:12px 14px;font-size:14px;font-family:inherit}
+  .field textarea{resize:vertical;min-height:80px}
+  .err{color:var(--red);font-size:12px;margin-top:5px;display:none}
+  .field.invalid input,.field.invalid select,.field.invalid textarea{border-color:var(--red)}
+  .field.invalid .err{display:block}
+  .pay{background:#f1f7ff;border:1px dashed var(--ocean);border-radius:14px;padding:14px 16px;font-size:13px;line-height:1.9;color:#33475b;margin-bottom:14px}
+  .pay b{color:var(--navy)}
+  .loc-box{background:#f8fafc;border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:14px;font-size:13px}
+  .loc-ok{color:var(--green-dark);font-weight:600}
+  .loc-btn{border:1px solid var(--ocean);background:#fff;color:var(--ocean);padding:9px 14px;border-radius:50px;font-weight:600;cursor:pointer;font-size:13px}
+  .note{font-size:12px;color:var(--muted);margin-top:6px}
+  .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:var(--navy);color:#fff;padding:13px 22px;border-radius:14px;font-size:14px;z-index:99;display:none;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+  .file-preview{margin-top:8px;max-height:150px;border-radius:12px;display:none}
+  .ig{display:inline-block;margin-top:14px;color:#fff;opacity:.9;font-size:13px}
+  footer{text-align:center;color:var(--muted);font-size:12px;padding:24px}
+</style>
+</head>
+<body>
+<header>
+  <div class="head-top">
+    <div class="brand">
+      <img src="{{ url_for('static', filename='121.png') }}" alt="HelloTabeeb" onerror="this.style.display='none'">
+      <div>
+        <h1>Barefruit Organics</h1>
+        <small>Pure, Wild &amp; Uncompromised</small>
+      </div>
+    </div>
+    <button class="cart-btn" onclick="openCart()">🛒 Cart <span class="count" id="cartCount" style="display:none">0</span></button>
+  </div>
+  <div class="hero">
+    <h2>Our Products</h2>
+    <p>100% natural, homemade-style fruit preserves — delivered to your door.</p>
+    <div class="highlights">
+      <span class="chip">🌿 100% Natural</span>
+      <span class="chip">🚫 Preservative-Free</span>
+      <span class="chip">🏡 Homemade-Style</span>
+    </div>
+    <a class="ig" href="https://instagram.com/barefruit_organics" target="_blank" rel="noopener">📷 @barefruit_organics</a>
+  </div>
+</header>
+
+<main>
+  <div class="grid" id="grid"></div>
+</main>
+
+<!-- Product detail -->
+<div class="overlay" id="detailOverlay">
+  <div class="panel">
+    <div class="panel-head"><h3 id="dName">Product</h3><button class="x" onclick="closeDetail()">×</button></div>
+    <div class="panel-body">
+      <div class="detail-img" id="dImg"></div>
+      <div class="price" id="dPrice"></div>
+      <div class="pack" id="dPack"></div>
+      <ul class="bullets" id="dBullets"></ul>
+      <button class="btn-primary" style="margin-top:20px" id="dAdd">Add to Cart</button>
+    </div>
+  </div>
+</div>
+
+<!-- Cart -->
+<div class="overlay" id="cartOverlay">
+  <div class="panel">
+    <div class="panel-head"><h3>Your Cart</h3><button class="x" onclick="closeCart()">×</button></div>
+    <div class="panel-body" id="cartBody"></div>
+  </div>
+</div>
+
+<!-- Checkout -->
+<div class="overlay" id="checkoutOverlay">
+  <div class="panel">
+    <div class="panel-head"><h3>Checkout</h3><button class="x" onclick="closeCheckout()">×</button></div>
+    <div class="panel-body">
+      <div class="summary"><span>Total</span><span id="coTotal">PKR 0</span></div>
+
+      <div class="pay">
+        <b>Payment Details</b><br>
+        Bank: <b>{{ payment.bank_name }}</b><br>
+        Title: <b>{{ payment.account_title }}</b><br>
+        Account #: <b>{{ payment.account_number }}</b><br>
+        IBAN: <b>{{ payment.iban }}</b><br>
+        EasyPaisa / JazzCash: <b>{{ payment.easypaisa_jazzcash }}</b><br>
+        <span class="note">Transfer the total amount, then upload your payment screenshot below.</span>
+      </div>
+
+      <form id="coForm" novalidate>
+        <div class="loc-box">
+          <div id="locStatus">📍 Location not captured.</div>
+          <p class="note" id="locHint">Enable location to auto-attach your delivery coordinates for faster, accurate delivery.</p>
+          <button type="button" class="loc-btn" id="locBtn" style="margin-top:8px">Use my location</button>
+        </div>
+
+        <div class="field" id="f_name">
+          <label>Full Name *</label>
+          <input name="name" maxlength="60" placeholder="Your name" autocomplete="name">
+          <div class="err">Enter a valid name (letters only).</div>
+        </div>
+        <div class="field" id="f_email">
+          <label>Email *</label>
+          <input name="email" type="email" maxlength="120" placeholder="you@example.com" autocomplete="email">
+          <div class="err">Enter a valid email address.</div>
+        </div>
+        <div class="field" id="f_phone">
+          <label>Phone Number *</label>
+          <input name="phone" maxlength="11" inputmode="numeric" placeholder="03XXXXXXXXX" autocomplete="tel">
+          <div class="err">Enter a valid number (03XXXXXXXXX).</div>
+        </div>
+        <div class="field" id="f_city">
+          <label>City *</label>
+          <select name="city">
+            <option value="">Select city</option>
+            {% for c in cities %}<option value="{{ c }}">{{ c }}</option>{% endfor %}
+          </select>
+          <div class="err">Please select your city.</div>
+        </div>
+        <div class="field" id="f_note">
+          <label>Message to order verifier (optional)</label>
+          <textarea name="note" maxlength="1000" placeholder="Anything we should know about your order or payment"></textarea>
+        </div>
+        <div class="field" id="f_screenshot">
+          <label>Payment Screenshot *</label>
+          <input name="screenshot" type="file" accept="image/*" id="ssInput">
+          <img class="file-preview" id="ssPreview" alt="preview">
+          <div class="err">Please attach an image of your payment.</div>
+        </div>
+
+        <button type="submit" class="btn-primary" id="placeBtn">Place Order</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<footer>© Barefruit Organics × HelloTabeeb</footer>
+
+<script>
+const PRODUCTS = {{ products | tojson }};
+const PLACE_URL = "{{ url_for('barefruit.place_order') }}";
+const cart = {}; // id -> qty
+let latitude = null, longitude = null;
+
+function money(n){ return "PKR " + n; }
+function bullets(p){
+  return [
+    "100% natural " + p.name.toLowerCase() + " with no artificial colors or flavors.",
+    "Preservative-free, homemade-style recipe in a " + p.pack + " jar.",
+    "Slow-cooked in small batches to lock in real fruit taste.",
+    "Perfect with breakfast, desserts, or a wholesome snack.",
+    "Store in a cool, dry place; refrigerate after opening."
+  ];
+}
+function imgTag(p, cls){
+  return '<img src="/static/barefruit/'+p.image+'" alt="'+p.name+'" '+
+         'onerror="this.parentNode.innerHTML=\'<div class=&quot;ph&quot;>🍓</div>\'">';
+}
+
+function renderGrid(){
+  const g = document.getElementById('grid');
+  g.innerHTML = PRODUCTS.map(p=>{
+    return `<div class="card">
+      <div class="thumb" onclick="openDetail('${p.id}')">${imgTag(p)}</div>
+      <div class="card-body">
+        <h3>${p.name}</h3>
+        <div class="pack">${p.pack}</div>
+        <div class="price">${money(p.price)}</div>
+        <div id="ctrl_${p.id}">${controlHtml(p.id)}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+function controlHtml(id){
+  const q = cart[id]||0;
+  if(q<=0) return `<button class="add" onclick="addToCart('${id}')">Add to Cart</button>`;
+  return `<div class="qty"><button onclick="dec('${id}')">−</button><span>${q}</span><button onclick="inc('${id}')">+</button></div>`;
+}
+function refreshCtrl(id){ const el=document.getElementById('ctrl_'+id); if(el) el.innerHTML=controlHtml(id); updateCount(); }
+function updateCount(){
+  const n = Object.values(cart).reduce((a,b)=>a+b,0);
+  const c = document.getElementById('cartCount');
+  c.textContent = n; c.style.display = n>0 ? 'flex':'none';
+}
+function addToCart(id){ cart[id]=(cart[id]||0)+1; refreshCtrl(id); toast('Added to cart'); }
+function inc(id){ if((cart[id]||0)<99){cart[id]++;} refreshCtrl(id); }
+function dec(id){ cart[id]=(cart[id]||0)-1; if(cart[id]<=0) delete cart[id]; refreshCtrl(id); if(document.getElementById('cartOverlay').classList.contains('open')) renderCart(); }
+
+// detail
+let detailId=null;
+function openDetail(id){
+  const p = PRODUCTS.find(x=>x.id===id); detailId=id;
+  document.getElementById('dName').textContent=p.name;
+  document.getElementById('dImg').innerHTML=imgTag(p);
+  document.getElementById('dPrice').textContent=money(p.price);
+  document.getElementById('dPack').textContent="Pack size: "+p.pack;
+  document.getElementById('dBullets').innerHTML=bullets(p).map(b=>`<li>${b}</li>`).join('');
+  document.getElementById('dAdd').onclick=()=>{addToCart(id); closeDetail(); };
+  open('detailOverlay');
+}
+function closeDetail(){ close('detailOverlay'); }
+
+// cart
+function openCart(){ renderCart(); open('cartOverlay'); }
+function closeCart(){ close('cartOverlay'); }
+function cartItems(){
+  return Object.keys(cart).map(id=>{ const p=PRODUCTS.find(x=>x.id===id); return {...p, qty:cart[id]}; });
+}
+function subtotal(){ return cartItems().reduce((s,it)=>s+it.price*it.qty,0); }
+function renderCart(){
+  const items = cartItems(); const body=document.getElementById('cartBody');
+  if(items.length===0){
+    body.innerHTML=`<div class="empty"><div class="big">🧺</div><p>Your cart is empty.</p>
+      <button class="btn-block" onclick="closeCart()">Browse Products</button></div>`;
+    return;
+  }
+  body.innerHTML = items.map(it=>`
+    <div class="crow">
+      <div class="info"><b>${it.name}</b><small>${it.pack} · ${money(it.price)}</small></div>
+      <div class="qty" style="width:130px"><button onclick="dec('${it.id}')">−</button><span>${it.qty}</span><button onclick="inc('${it.id}');renderCart()">+</button></div>
+      <button class="rm" onclick="removeItem('${it.id}')">Remove</button>
+    </div>`).join('')
+    + `<div class="summary"><span>Total</span><span>${money(subtotal())}</span></div>
+       <button class="btn-primary" onclick="goCheckout()">Proceed to Checkout</button>`;
+}
+function removeItem(id){ delete cart[id]; refreshCtrl(id); renderCart(); }
+
+// checkout
+function goCheckout(){
+  if(cartItems().length===0){ toast('Your cart is empty'); return; }
+  document.getElementById('coTotal').textContent=money(subtotal());
+  close('cartOverlay'); open('checkoutOverlay');
+}
+function closeCheckout(){ close('checkoutOverlay'); }
+
+document.getElementById('locBtn').addEventListener('click', ()=>{
+  if(!navigator.geolocation){ document.getElementById('locStatus').textContent='📍 Location not supported by this browser.'; return; }
+  document.getElementById('locStatus').textContent='📍 Requesting location…';
+  navigator.geolocation.getCurrentPosition(pos=>{
+    latitude=pos.coords.latitude; longitude=pos.coords.longitude;
+    document.getElementById('locStatus').innerHTML='<span class="loc-ok">✔ Location captured.</span>';
+    document.getElementById('locHint').style.display='none';
+  }, ()=>{
+    document.getElementById('locStatus').textContent='📍 Permission denied. You can still order without location.';
+  }, {enableHighAccuracy:true, timeout:10000});
+});
+
+document.getElementById('ssInput').addEventListener('change', e=>{
+  const f=e.target.files[0]; const prev=document.getElementById('ssPreview');
+  if(f && f.type.startsWith('image/')){ prev.src=URL.createObjectURL(f); prev.style.display='block'; }
+  else { prev.style.display='none'; }
+});
+
+function setInvalid(id, bad){ document.getElementById(id).classList.toggle('invalid', bad); }
+function validate(form){
+  let ok=true;
+  const name=form.name.value.trim();
+  setInvalid('f_name', !/^[A-Za-z][A-Za-z .'-]{1,59}$/.test(name)); if(!/^[A-Za-z][A-Za-z .'-]{1,59}$/.test(name)) ok=false;
+  const email=form.email.value.trim();
+  const eok=/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email); setInvalid('f_email', !eok); if(!eok) ok=false;
+  const phone=form.phone.value.replace(/\D/g,'');
+  const pok=/^03\d{9}$/.test(phone); setInvalid('f_phone', !pok); if(!pok) ok=false;
+  const city=form.city.value; setInvalid('f_city', !city); if(!city) ok=false;
+  const ss=form.screenshot.files[0];
+  const sok=ss && ss.type.startsWith('image/'); setInvalid('f_screenshot', !sok); if(!sok) ok=false;
+  return ok;
+}
+
+document.getElementById('coForm').addEventListener('submit', async e=>{
+  e.preventDefault();
+  const form=e.target;
+  if(cartItems().length===0){ toast('Your cart is empty'); closeCheckout(); return; }
+  if(!validate(form)) return;
+  const btn=document.getElementById('placeBtn');
+  btn.disabled=true; btn.textContent='Placing order…';
+  const fd=new FormData();
+  fd.append('items', JSON.stringify(cartItems().map(it=>({id:it.id, quantity:it.qty}))));
+  fd.append('name', form.name.value.trim());
+  fd.append('email', form.email.value.trim());
+  fd.append('phone', form.phone.value.replace(/\D/g,''));
+  fd.append('city', form.city.value);
+  fd.append('note', form.note.value.trim());
+  if(latitude!=null && longitude!=null){ fd.append('latitude', latitude); fd.append('longitude', longitude); }
+  fd.append('screenshot', form.screenshot.files[0]);
+  try{
+    const res=await fetch(PLACE_URL,{method:'POST', body:fd});
+    const data=await res.json();
+    if(data.success){
+      for(const k in cart) delete cart[k];
+      renderGrid(); updateCount();
+      document.querySelector('#checkoutOverlay .panel-body').innerHTML=
+        `<div class="empty"><div class="big">✅</div><h3 style="color:var(--navy);margin-bottom:8px">Order Placed!</h3>
+         <p>${data.message||'We will confirm your order shortly.'}</p>
+         <p class="note" style="margin-top:8px">Order ID: ${data.orderId||''}</p>
+         <button class="btn-block" onclick="closeCheckout();location.reload()">Done</button></div>`;
+    } else {
+      toast(data.message||'Could not place order'); btn.disabled=false; btn.textContent='Place Order';
+    }
+  }catch(err){
+    toast('Network error. Please try again.'); btn.disabled=false; btn.textContent='Place Order';
+  }
+});
+
+// overlay helpers
+function open(id){ document.getElementById(id).classList.add('open'); document.body.style.overflow='hidden'; }
+function close(id){ document.getElementById(id).classList.remove('open'); document.body.style.overflow=''; }
+let toastT;
+function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.style.display='block'; clearTimeout(toastT); toastT=setTimeout(()=>t.style.display='none',2600); }
+
+document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{ if(e.target===o) close(o.id); }));
+renderGrid();
+</script>
+</body>
+</html>

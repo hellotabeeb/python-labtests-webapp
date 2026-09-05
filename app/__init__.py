@@ -127,6 +127,9 @@ def create_app():
     from .routes import main
     app.register_blueprint(main)
 
+    from .barefruit import barefruit
+    app.register_blueprint(barefruit)
+
     return app
 
 # Export db and drive_service instances
