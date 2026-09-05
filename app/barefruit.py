@@ -63,7 +63,9 @@ SENDER = {"name": "Barefruit Organics", "email": "support@hellotabeeb.com"}
 
 # Base URL the emailed action buttons point at. Override with PUBLIC_BASE_URL
 # once the Flask app is deployed (e.g. https://hellotabeeb.pk).
-PUBLIC_BASE_URL = os.getenv("PUBLIC_BASE_URL", "https://hellotabeeb.pk").rstrip("/")
+# Trim whitespace/newlines (a stray line break in the env var would otherwise
+# be baked into every emailed link and break Brevo's link tracking).
+PUBLIC_BASE_URL = (os.getenv("PUBLIC_BASE_URL") or "https://hellotabeeb.pk").strip().rstrip("/")
 
 MAX_SCREENSHOT_BYTES = 6 * 1024 * 1024  # 6 MB
 MAX_QTY_PER_ITEM = 99
@@ -158,7 +160,10 @@ def _new_token():
 def _action_url(order_id, token, action):
     from urllib.parse import urlencode
     q = urlencode({"orderId": order_id, "token": token, "action": action})
-    return f"{PUBLIC_BASE_URL}/barefruit/action?{q}"
+    url = f"{PUBLIC_BASE_URL}/barefruit/action?{q}"
+    # Defensive: strip any control characters (newlines/tabs) that would break
+    # URL parsing / email link tracking.
+    return "".join(ch for ch in url if ch >= " ")
 
 
 def _tokens_match(stored, provided):
@@ -484,7 +489,7 @@ textarea{{width:100%;min-height:120px;border:1px solid #d0d7de;border-radius:12p
 button{{margin-top:18px;width:100%;padding:14px;border:none;border-radius:50px;background:linear-gradient(135deg,{BRAND['red_dark']},{BRAND['red']});color:#fff;font-size:15px;font-weight:700;cursor:pointer}}</style></head>
 <body><div class="card"><h1>Reject Order #{escape(order_id)}</h1>
 <p>Please provide a reason for rejecting this order (most often a payment-screenshot issue). The customer will receive this reason by email.</p>
-<form method="POST" action="{escape(action_post)}">
+<form method="get" action="{escape(action_post)}">
 <input type="hidden" name="orderId" value="{escape(order_id)}">
 <input type="hidden" name="token" value="{escape(token)}">
 <textarea name="reason" required maxlength="1000" placeholder="e.g. The payment screenshot is unclear / amount does not match / transaction not found."></textarea>
@@ -680,11 +685,13 @@ def order_action():
     return _result_page("Invalid Action", "Unknown action.", False, 400)
 
 
-@barefruit.route("/barefruit/reject", methods=["POST"])
+@barefruit.route("/barefruit/reject", methods=["GET", "POST"])
 def reject_order():
-    order_id = request.form.get("orderId", "")
-    token = request.form.get("token", "")
-    reason = (request.form.get("reason") or "").strip()
+    # Read from request.values so it works whether the reason form is submitted
+    # as GET (fields in the query string, survives email/proxy redirects) or POST.
+    order_id = request.values.get("orderId", "")
+    token = request.values.get("token", "")
+    reason = (request.values.get("reason") or "").strip()
 
     if not order_id or not token:
         return _result_page("Invalid Request", "Missing required information.", False, 400)
