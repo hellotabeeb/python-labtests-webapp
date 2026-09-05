@@ -1,5 +1,14 @@
 # .gitignore
 
+# Virtualenvs / dependencies (must never be committed or shipped to the image)
+venv/
+.venv/
+env/
+ENV/
+node_modules/
+__pycache__/
+*.pyc
+
 # Environment variables
 .env
 

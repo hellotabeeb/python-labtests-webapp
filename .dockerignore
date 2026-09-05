@@ -1,0 +1,32 @@
+# Never copy local virtualenvs / installed packages into the image —
+# dependencies are installed fresh from requirements.txt inside the build.
+venv/
+.venv/
+env/
+ENV/
+
+# Node
+node_modules/
+
+# Python caches
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+
+# Git & editor metadata
+.git/
+.gitignore
+.vscode/
+.idea/
+
+# Local env & secrets (provided via CapRover env vars, not the image)
+.env
+app/serviceAccountKey.json
+app/googledrivecredentials.json
+client_secret_*.json
+
+# Docs / misc that the running app does not need
+docs/
