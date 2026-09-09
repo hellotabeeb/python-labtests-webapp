@@ -57,7 +57,7 @@ barefruit = Blueprint("barefruit", __name__)
 ORDERS_COLLECTION = "barefruitOrders"
 
 ADMIN_EMAIL = "hellotabeeb@gmail.com"
-SHIPPING_MANAGER_EMAIL = "faizanahmedfayyaz10@gmail.com"
+SHIPPING_MANAGER_EMAIL = "hellotabeeb.dpt@gmail.com"
 SUPPORT_EMAIL = "support@hellotabeeb.com"
 SENDER = {"name": "Barefruit Organics", "email": "support@hellotabeeb.com"}
 
@@ -93,12 +93,48 @@ BRAND = {
 
 # Catalog — the single source of truth for prices (never trust the client).
 BAREFRUIT_PRODUCTS = [
-    {"id": "strawberry-jam", "name": "Strawberry Jam", "pack": "250 g", "price": 500, "image": "strawberry_jam.jpg"},
-    {"id": "orange-marmalade", "name": "Orange Marmalade", "pack": "250 g", "price": 500, "image": "orange_marmalade.jpg"},
-    {"id": "mango-jam", "name": "Mango Jam", "pack": "250 g", "price": 500, "image": "mango_jam.jpg"},
-    {"id": "peach-jam", "name": "Peach Jam", "pack": "250 g", "price": 500, "image": "peach_jam.jpg"},
-    {"id": "apple-jam", "name": "Apple Jam", "pack": "250 g", "price": 500, "image": "apple_jam.jpg"},
-    {"id": "cherry-jam", "name": "Cherry Jam", "pack": "150 g", "price": 500, "image": "cherry_jam.jpg"},
+    {
+        "id": "strawberry-jam", "name": "Strawberry Jam", "pack": "250 g", "price": 550,
+        "image": "Strawberry jam.jpeg",
+        "description": "Made with ripe natural strawberries for a bright, fruity spread. Its balanced sweetness makes breakfast and desserts feel freshly prepared.",
+        "ingredients": "Natural Strawberry, Sugar, Lemon Juice, Pectin",
+    },
+    {
+        "id": "orange-marmalade", "name": "Orange Marmalade", "pack": "250 g", "price": 600,
+        "image": "orange marmalade.jpeg",
+        "description": "Made with natural oranges for a fragrant citrus spread with a lively taste. Enjoy its sunny flavour on toast, pastries, and everyday snacks.",
+        "ingredients": "Natural Orange, Sugar, Lemon Juice, Pectin",
+    },
+    {
+        "id": "mango-jam", "name": "Mango Jam", "pack": "250 g", "price": 550,
+        "image": "mango jam.jpeg",
+        "description": "Made with natural mangoes for a rich tropical taste in every spoonful. It brings a smooth, cheerful fruit flavour to breakfast and baking.",
+        "ingredients": "Natural Mango, Sugar, Lemon Juice, Pectin",
+    },
+    {
+        "id": "peach-jam", "name": "Peach Jam", "pack": "250 g", "price": 550,
+        "image": "peach jam.jpeg",
+        "description": "Made with natural peaches for a soft, aromatic fruit spread. Its gentle sweetness is perfect for toast, yogurt, pastries, and desserts.",
+        "ingredients": "Natural Peach, Sugar, Lemon Juice, Pectin",
+    },
+    {
+        "id": "apple-jam", "name": "Apple Jam", "pack": "250 g", "price": 550,
+        "image": "Apple Jam.jpeg",
+        "description": "Made with natural apples for a comforting spread with a clean fruit taste. It is a delicious choice for toast, sandwiches, and home baking.",
+        "ingredients": "Natural Apple, Sugar, Lemon Juice, Pectin",
+    },
+    {
+        "id": "talbina-200g", "name": "Talbina", "pack": "200 g", "price": 900,
+        "image": "talbina.jpeg",
+        "description": "A wholesome Talbina blend made with barley and Ajwa dates for a nourishing bowl. Prepare it warm with milk or water for a satisfying daily meal.",
+        "ingredients": "Milk, Barley Porridge, Raisins, Dates, Almonds, Walnuts",
+    },
+    {
+        "id": "talbina-450g", "name": "Talbina", "pack": "450 g", "price": 1800,
+        "image": "talbina.jpeg",
+        "description": "A family size Talbina blend made with barley and Ajwa dates for a nourishing bowl. Prepare it warm with milk or water for a satisfying daily meal.",
+        "ingredients": "Milk, Barley Porridge, Raisins, Dates, Almonds, Walnuts",
+    },
 ]
 
 PRODUCTS_BY_ID = {p["id"]: p for p in BAREFRUIT_PRODUCTS}

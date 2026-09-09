@@ -209,11 +209,8 @@ let latitude = null, longitude = null;
 function money(n){ return "PKR " + n; }
 function bullets(p){
   return [
-    "100% natural " + p.name.toLowerCase() + " with no artificial colors or flavors.",
-    "Preservative-free, homemade-style recipe in a " + p.pack + " jar.",
-    "Slow-cooked in small batches to lock in real fruit taste.",
-    "Perfect with breakfast, desserts, or a wholesome snack.",
-    "Store in a cool, dry place; refrigerate after opening."
+    p.description,
+    "Ingredients: " + p.ingredients
   ];
 }
 function imgTag(p, cls){
