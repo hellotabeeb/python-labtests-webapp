@@ -71,13 +71,10 @@ MAX_SCREENSHOT_BYTES = 6 * 1024 * 1024  # 6 MB
 MAX_QTY_PER_ITEM = 99
 DRIVE_FOLDER_NAME = "barefruit payment screenshots"
 
-# Random placeholder payment details — replace with the real ones later.
 PAYMENT_DETAILS = {
-    "bank_name": "Meezan Bank",
-    "account_title": "Barefruit Organics",
-    "account_number": "0123 4567 8901 234",
-    "iban": "PK00 MEZN 0000 0123 4567 8901",
-    "easypaisa_jazzcash": "0300 1234567",
+    "bank_name": "Allied Bank",
+    "account_title": "Be the health SMC Pvt Ltd.",
+    "account_number": "07650010084877530015",
 }
 
 # Brand palette (matches the Hello Tabeeb / Barefruit color scheme).
