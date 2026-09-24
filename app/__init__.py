@@ -80,9 +80,21 @@ def create_app():
     Flask application factory that initializes Firebase and Google Drive services.
     """
     app = Flask(__name__)
-    
-    # Use environment variable for secret key in production
-    app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', '1234567')  # Replace default for production
+
+    # SECRET_KEY must come from the environment in production. Never ship a
+    # weak hard-coded fallback: if it is missing we generate a strong random
+    # key at startup (sessions won't survive a restart, which is a safe,
+    # loud signal to set SECRET_KEY rather than a silent insecure default).
+    secret_key = os.getenv('SECRET_KEY')
+    if not secret_key:
+        import secrets as _secrets
+        secret_key = _secrets.token_hex(32)
+        import logging as _logging
+        _logging.getLogger(__name__).warning(
+            "SECRET_KEY not set — generated an ephemeral key. Set SECRET_KEY in "
+            "the environment for stable, secure sessions."
+        )
+    app.config['SECRET_KEY'] = secret_key
 
     # Initialize Firebase Firestore
     service_account_info = os.getenv('SERVICE_ACCOUNT_KEY')
@@ -129,6 +141,12 @@ def create_app():
 
     from .barefruit import barefruit
     app.register_blueprint(barefruit)
+
+    # Authenticated API for the Flutter mobile app (Firebase ID token + App
+    # Check + rate limiting). Replaces the old client-held Brevo key and the
+    # service-account key that used to be bundled inside the app.
+    from .mobile_api import mobile_api
+    app.register_blueprint(mobile_api)
 
     return app
 
